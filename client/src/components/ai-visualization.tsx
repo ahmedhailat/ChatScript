@@ -31,23 +31,50 @@ export default function AIVisualization({
   const [effectLayers, setEffectLayers] = useState<EffectLayer[]>([]);
   const [selectedTab, setSelectedTab] = useState("results");
 
-  const handleMakeupColorChange = (type: string, color: string, intensity: number) => {
+  const handleMakeupColorChange = async (type: string, color: string, intensity: number) => {
     if (type === "reset") {
       setEffectLayers([]);
       return;
     }
 
-    const newLayer: EffectLayer = {
-      type: `makeup_${type}`,
-      color,
-      intensity,
-      visible: true
-    };
+    if (!beforeImage) return;
 
-    setEffectLayers(prev => {
-      const filtered = prev.filter(layer => layer.type !== `makeup_${type}`);
-      return [...filtered, newLayer];
-    });
+    try {
+      // Convert base64 to blob for upload
+      const response = await fetch(beforeImage);
+      const blob = await response.blob();
+      
+      const formData = new FormData();
+      formData.append('image', blob, 'photo.jpg');
+      formData.append('makeupType', type);
+      formData.append('color', color);
+      formData.append('intensity', intensity.toString());
+
+      const apiResponse = await fetch('/api/apply-makeup', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await apiResponse.json();
+      if (result.success && result.makeupImageUrl) {
+        // Update the after image with makeup applied
+        onGeneratePreview(); // Trigger update with new makeup image
+        
+        const newLayer: EffectLayer = {
+          type: `makeup_${type}`,
+          color,
+          intensity,
+          visible: true
+        };
+
+        setEffectLayers(prev => {
+          const filtered = prev.filter(layer => layer.type !== `makeup_${type}`);
+          return [...filtered, newLayer];
+        });
+      }
+    } catch (error) {
+      console.error('Failed to apply makeup:', error);
+    }
   };
 
   const handleMedicalEffectChange = (effect: string, intensity: number, duration: number) => {
@@ -63,17 +90,42 @@ export default function AIVisualization({
     });
   };
 
-  const handleAgeChange = (age: number) => {
-    const newLayer: EffectLayer = {
-      type: `age_progression`,
-      intensity: age,
-      visible: true
-    };
+  const handleAgeChange = async (age: number) => {
+    if (!beforeImage) return;
 
-    setEffectLayers(prev => {
-      const filtered = prev.filter(layer => layer.type !== `age_progression`);
-      return [...filtered, newLayer];
-    });
+    try {
+      // Convert base64 to blob for upload
+      const response = await fetch(beforeImage);
+      const blob = await response.blob();
+      
+      const formData = new FormData();
+      formData.append('image', blob, 'photo.jpg');
+      formData.append('targetAge', age.toString());
+
+      const apiResponse = await fetch('/api/age-progression', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await apiResponse.json();
+      if (result.success && result.agedImageUrl) {
+        // Update the after image with age progression
+        onGeneratePreview(); // Trigger update
+        
+        const newLayer: EffectLayer = {
+          type: `age_progression`,
+          intensity: age,
+          visible: true
+        };
+
+        setEffectLayers(prev => {
+          const filtered = prev.filter(layer => layer.type !== `age_progression`);
+          return [...filtered, newLayer];
+        });
+      }
+    } catch (error) {
+      console.error('Failed to generate age progression:', error);
+    }
   };
 
   const handleFacialAdjustments = (adjustments: any) => {
@@ -124,7 +176,7 @@ export default function AIVisualization({
           ) : (
             <Bot className="mr-2 w-4 h-4" />
           )}
-          Generate Prediction
+          {isProcessing ? 'Generating with AI...' : 'Generate AI Prediction'}
         </Button>
       </div>
 

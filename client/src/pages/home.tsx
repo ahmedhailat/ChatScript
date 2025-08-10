@@ -2,6 +2,7 @@ import Header from "@/components/header";
 import CameraCapture from "@/components/camera-capture";
 import ProcedureSelection from "@/components/procedure-selection";
 import AIVisualization from "@/components/ai-visualization";
+import AIPreviewGenerator from "@/components/ai-preview-generator";
 import ConsultationForm from "@/components/consultation-form";
 import SampleGallery from "@/components/sample-gallery";
 import Footer from "@/components/footer";
@@ -56,6 +57,12 @@ export default function Home() {
               selectedProcedure={selectedProcedure}
               onProcedureChange={setSelectedProcedure}
             />
+            <AIPreviewGenerator
+              beforeImage={beforeImage}
+              procedureType={selectedProcedure}
+              onPreviewGenerated={setAfterImage}
+              disabled={isProcessing}
+            />
           </div>
 
           {/* Center Column */}
@@ -64,21 +71,48 @@ export default function Home() {
               beforeImage={beforeImage}
               afterImage={afterImage}
               isProcessing={isProcessing}
-              onGeneratePreview={() => {
+              onGeneratePreview={async () => {
+                if (!beforeImage) return;
+                
                 setIsProcessing(true);
-                // Simulate AI processing with more realistic effects
-                setTimeout(() => {
-                  // Different results based on selected procedure
-                  const procedureImages = {
-                    rhinoplasty: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-                    dental: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-                    facelift: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-                    scar_removal: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400"
-                  };
+                
+                try {
+                  // Convert base64 to blob for upload
+                  const response = await fetch(beforeImage);
+                  const blob = await response.blob();
                   
-                  setAfterImage(procedureImages[selectedProcedure as keyof typeof procedureImages] || procedureImages.rhinoplasty);
+                  const formData = new FormData();
+                  formData.append('image', blob, 'photo.jpg');
+                  formData.append('procedureType', selectedProcedure);
+                  formData.append('intensity', '60'); // Default intensity
+                  
+                  const apiResponse = await fetch('/api/generate-surgical-preview', {
+                    method: 'POST',
+                    body: formData,
+                  });
+                  
+                  const result = await apiResponse.json();
+                  
+                  if (result.success && result.afterImageUrl) {
+                    setAfterImage(result.afterImageUrl);
+                  } else {
+                    console.error('Failed to generate preview:', result.error);
+                    // Fallback to demo images for development
+                    const procedureImages = {
+                      rhinoplasty: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+                      dental: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+                      facelift: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+                      scar_removal: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400"
+                    };
+                    setAfterImage(procedureImages[selectedProcedure as keyof typeof procedureImages] || procedureImages.rhinoplasty);
+                  }
+                } catch (error) {
+                  console.error('Error generating surgical preview:', error);
+                  // Show fallback image
+                  setAfterImage("https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400");
+                } finally {
                   setIsProcessing(false);
-                }, 3000);
+                }
               }}
             />
             <ConsultationForm className="mt-6" />

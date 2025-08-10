@@ -7,6 +7,7 @@ import { zfd } from "zod-form-data";
 import multer, { type MulterError } from "multer";
 import path from "path";
 import { randomUUID } from "crypto";
+import { aiProcessor } from "./ai-processor";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -101,33 +102,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Process image with AI (mock implementation)
-  app.post("/api/process-image", async (req, res) => {
+  // AI Visualization Endpoints
+  app.post('/api/generate-surgical-preview', upload.single('image'), async (req, res) => {
     try {
-      const { imageId, procedureType } = req.body;
-      
-      if (!imageId || !procedureType) {
-        return res.status(400).json({ message: "Image ID and procedure type are required" });
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image provided' });
       }
 
-      // Simulate AI processing delay
-      setTimeout(async () => {
-        try {
-          // Mock AI processing - in a real implementation, this would call an AI service
-          const processedResult = await storage.processImageWithAI(imageId, procedureType);
-          
-          // In a real implementation, you might use WebSockets to notify the client
-          res.json({
-            success: true,
-            result: processedResult,
-            message: "Image processed successfully"
-          });
-        } catch (error) {
-          res.status(500).json({ message: "AI processing failed" });
-        }
-      }, 2000); // 2 second delay to simulate processing
+      const { procedureType, intensity = 50 } = req.body;
+      
+      const request = {
+        imageUrl: req.file.path,
+        procedureType: procedureType || 'rhinoplasty',
+        intensity: parseInt(intensity),
+      };
+
+      const resultUrl = await aiProcessor.generateSurgicalVisualization(request);
+      
+      res.json({ 
+        success: true, 
+        afterImageUrl: resultUrl,
+        originalImageUrl: `/uploads/${req.file.filename}`
+      });
+
     } catch (error) {
-      res.status(500).json({ message: "Failed to initiate AI processing" });
+      console.error('Surgical preview error:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate surgical preview',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  app.post('/api/apply-makeup', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image provided' });
+      }
+
+      const { makeupType, color, intensity = 50 } = req.body;
+      
+      const request = {
+        imageUrl: req.file.path,
+        makeupType: makeupType || 'lipstick', 
+        color: color || '#FF6B6B',
+        intensity: parseInt(intensity),
+      };
+
+      const resultUrl = await aiProcessor.applyMakeup(request);
+      
+      res.json({ 
+        success: true, 
+        makeupImageUrl: resultUrl,
+        originalImageUrl: `/uploads/${req.file.filename}`
+      });
+
+    } catch (error) {
+      console.error('Makeup application error:', error);
+      res.status(500).json({ 
+        error: 'Failed to apply makeup',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  app.post('/api/age-progression', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image provided' });
+      }
+
+      const { targetAge = 40 } = req.body;
+      
+      const resultUrl = await aiProcessor.generateAgeProgression(
+        req.file.path, 
+        parseInt(targetAge)
+      );
+      
+      res.json({ 
+        success: true, 
+        agedImageUrl: resultUrl,
+        originalImageUrl: `/uploads/${req.file.filename}`
+      });
+
+    } catch (error) {
+      console.error('Age progression error:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate age progression',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  app.post('/api/analyze-image', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image provided' });
+      }
+
+      const analysis = await aiProcessor.analyzeImage(req.file.path);
+      
+      res.json({ 
+        success: true, 
+        analysis,
+        imageUrl: `/uploads/${req.file.filename}`
+      });
+
+    } catch (error) {
+      console.error('Image analysis error:', error);
+      res.status(500).json({ 
+        error: 'Failed to analyze image',
+        details: (error as Error).message 
+      });
     }
   });
 
