@@ -47,6 +47,7 @@ export default function InteractiveMakeupTool({
   const [strokes, setStrokes] = useState<MakeupStroke[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [colorPickerMode, setColorPickerMode] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   
   const { toast } = useToast();
 
@@ -121,7 +122,23 @@ export default function InteractiveMakeupTool({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
+    setCursorPosition({ x, y });
     drawMakeup(x, y, false);
+  }, [isDrawing, colorPickerMode, selectedTool, selectedColor, brushSize, intensity]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = overlayCanvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    setCursorPosition({ x, y });
+    
+    if (isDrawing && !colorPickerMode) {
+      drawMakeup(x, y, false);
+    }
   }, [isDrawing, colorPickerMode, selectedTool, selectedColor, brushSize, intensity]);
 
   const stopDrawing = useCallback(() => {
@@ -140,11 +157,7 @@ export default function InteractiveMakeupTool({
     const r = parseInt(hexColor.substr(0, 2), 16);
     const g = parseInt(hexColor.substr(2, 2), 16);
     const b = parseInt(hexColor.substr(4, 2), 16);
-    const alpha = (intensity[0] / 100) * 0.8;
-    
-    // Set brush properties
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    const alpha = (intensity[0] / 100) * 0.6;
     
     // Apply makeup effect based on selected tool
     const tool = makeupTools.find(t => t.id === selectedTool);
@@ -152,22 +165,30 @@ export default function InteractiveMakeupTool({
       ctx.globalCompositeOperation = tool.blendMode as GlobalCompositeOperation;
     }
     
-    // Draw circular brush stroke with soft edges
-    const gradient = ctx.createRadialGradient(x, y, 0, x, y, brushSize[0]);
-    gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha})`);
-    gradient.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, ${alpha * 0.5})`);
-    gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+    // Create more realistic brush effect
+    ctx.globalAlpha = alpha;
     
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(x, y, brushSize[0], 0, 2 * Math.PI);
-    ctx.fill();
+    // Draw multiple layers for smooth effect
+    for (let i = 0; i < 3; i++) {
+      const layerAlpha = alpha * (1 - i * 0.3);
+      const layerSize = brushSize[0] * (1 - i * 0.2);
+      
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, layerSize);
+      gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${layerAlpha})`);
+      gradient.addColorStop(0.6, `rgba(${r}, ${g}, ${b}, ${layerAlpha * 0.4})`);
+      gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+      
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(x, y, layerSize, 0, 2 * Math.PI);
+      ctx.fill();
+    }
     
     // Reset composition mode
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
     
-    // Store stroke for later processing
+    // Store stroke for tracking
     if (isStart) {
       const newStroke: MakeupStroke = {
         x, y, 
@@ -340,7 +361,7 @@ export default function InteractiveMakeupTool({
             pointerEvents: 'auto'
           }}
           onMouseDown={startDrawing}
-          onMouseMove={draw}
+          onMouseMove={handleMouseMove}
           onMouseUp={stopDrawing}
           onMouseLeave={stopDrawing}
         />
@@ -348,11 +369,14 @@ export default function InteractiveMakeupTool({
         {/* مؤشر الفرشاة */}
         {selectedTool && !colorPickerMode && (
           <div 
-            className="absolute pointer-events-none border-2 border-white rounded-full"
+            className="absolute pointer-events-none border-2 border-white rounded-full shadow-lg"
             style={{
+              left: cursorPosition.x,
+              top: cursorPosition.y,
               width: brushSize[0] * 2,
               height: brushSize[0] * 2,
               backgroundColor: selectedColor + '40',
+              borderColor: selectedColor,
               transform: 'translate(-50%, -50%)',
               zIndex: 10
             }}

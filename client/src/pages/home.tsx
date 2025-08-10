@@ -7,6 +7,7 @@ import FaceAreaSelector from "@/components/face-area-selector";
 import LiveMakeupOverlay from "@/components/live-makeup-overlay";
 import EnhancedMakeupStudio from "@/components/enhanced-makeup-studio";
 import InteractiveMakeupTool from "@/components/interactive-makeup-tool";
+import AreaMakeupTool from "@/components/area-makeup-tool";
 import ConsultationForm from "@/components/consultation-form";
 import SampleGallery from "@/components/sample-gallery";
 import Footer from "@/components/footer";
@@ -63,10 +64,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* Interactive Makeup Tool (when enabled) */}
+        {/* Area-Based Makeup Tool (when enabled) */}
         {showMakeupTool && beforeImage && (
           <div className="mb-8">
-            <InteractiveMakeupTool
+            <AreaMakeupTool
               image={beforeImage}
               onMakeupApplied={setAfterImage}
             />
