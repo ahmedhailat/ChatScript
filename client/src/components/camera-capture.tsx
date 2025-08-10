@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
-import { Camera, Upload, FileImage } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { Camera, Upload, FileImage, RotateCcw, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useCamera } from "@/hooks/use-camera";
 
 interface CameraCaptureProps {
   onImageCapture: (imageUrl: string) => void;
@@ -11,7 +12,9 @@ interface CameraCaptureProps {
 export default function CameraCapture({ onImageCapture, beforeImage }: CameraCaptureProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const { toast } = useToast();
+  const { videoRef, canvasRef, isStreaming, error, startCamera, stopCamera, capturePhoto } = useCamera();
 
   const handleFileUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -72,6 +75,35 @@ export default function CameraCapture({ onImageCapture, beforeImage }: CameraCap
     }
   };
 
+  const handleTakePhoto = async () => {
+    if (!isStreaming) {
+      setShowCamera(true);
+      await startCamera();
+    } else {
+      const photoData = capturePhoto();
+      if (photoData) {
+        onImageCapture(photoData);
+        stopCamera();
+        setShowCamera(false);
+        toast({
+          title: "Photo captured successfully",
+          description: "Ready for AI analysis",
+        });
+      }
+    }
+  };
+
+  const handleCancelCamera = () => {
+    stopCamera();
+    setShowCamera(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, [stopCamera]);
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
       <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
@@ -79,19 +111,55 @@ export default function CameraCapture({ onImageCapture, beforeImage }: CameraCap
         Patient Photo Capture
       </h3>
       
+      {/* Camera View */}
+      {showCamera && (
+        <div className="mb-6 bg-black rounded-lg overflow-hidden relative">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full h-64 object-cover"
+            data-testid="camera-video-feed"
+          />
+          <canvas ref={canvasRef} className="hidden" />
+          
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
+            <Button
+              onClick={handleTakePhoto}
+              className="bg-medical-blue hover:bg-blue-700 text-white rounded-full w-16 h-16"
+              data-testid="button-capture-photo"
+            >
+              <Camera className="w-6 h-6" />
+            </Button>
+            <Button
+              onClick={handleCancelCamera}
+              variant="outline"
+              className="bg-white/90 hover:bg-white rounded-full w-16 h-16"
+              data-testid="button-cancel-camera"
+            >
+              <X className="w-6 h-6" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Camera/Upload Area */}
       <div 
-        className={`border-2 border-dashed rounded-lg p-8 text-center mb-4 transition-colors cursor-pointer ${
-          isDragging 
-            ? "border-medical-blue bg-blue-50" 
-            : beforeImage 
-              ? "border-medical-success bg-green-50" 
-              : "border-slate-300 hover:border-medical-blue bg-slate-50"
+        className={`border-2 border-dashed rounded-lg p-8 text-center mb-4 transition-colors ${
+          showCamera 
+            ? "hidden"
+            : `cursor-pointer ${
+              isDragging 
+                ? "border-medical-blue bg-blue-50" 
+                : beforeImage 
+                  ? "border-medical-success bg-green-50" 
+                  : "border-slate-300 hover:border-medical-blue bg-slate-50"
+            }`
         }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => !showCamera && fileInputRef.current?.click()}
         data-testid="camera-upload-area"
       >
         <input
@@ -123,6 +191,7 @@ export default function CameraCapture({ onImageCapture, beforeImage }: CameraCap
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button 
                 className="bg-medical-blue hover:bg-blue-700"
+                onClick={handleTakePhoto}
                 data-testid="button-take-photo"
               >
                 <Camera className="mr-2 w-4 h-4" />
@@ -130,6 +199,7 @@ export default function CameraCapture({ onImageCapture, beforeImage }: CameraCap
               </Button>
               <Button 
                 variant="outline"
+                onClick={() => fileInputRef.current?.click()}
                 data-testid="button-upload-file"
               >
                 <Upload className="mr-2 w-4 h-4" />

@@ -66,9 +66,17 @@ export default function Home() {
               isProcessing={isProcessing}
               onGeneratePreview={() => {
                 setIsProcessing(true);
-                // Simulate AI processing
+                // Simulate AI processing with more realistic effects
                 setTimeout(() => {
-                  setAfterImage("https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400");
+                  // Different results based on selected procedure
+                  const procedureImages = {
+                    rhinoplasty: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+                    dental: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+                    facelift: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+                    scar_removal: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400"
+                  };
+                  
+                  setAfterImage(procedureImages[selectedProcedure as keyof typeof procedureImages] || procedureImages.rhinoplasty);
                   setIsProcessing(false);
                 }, 3000);
               }}
