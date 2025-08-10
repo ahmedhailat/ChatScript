@@ -9,6 +9,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { aiProcessor } from "./ai-processor";
 import { imageProcessor } from "./image-processor";
+import { makeupProcessor } from "./makeup-processor";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -202,13 +203,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (aiError) {
         console.log('AI makeup failed, using local processing:', (aiError as Error).message);
         
-        // Fallback to local image processing
-        const localResultPath = await imageProcessor.applyMakeupEffect(
+        // Fallback to local makeup processing
+        const localResultPath = await makeupProcessor.applyMakeup(
           req.file.path,
-          makeupType || 'lipstick',
-          color || '#FF6B6B',
-          makeupArea,
-          parseInt(intensity)
+          {
+            type: (makeupType || 'lipstick') as any,
+            color: color || '#FF6B6B',
+            area: makeupArea,
+            intensity: parseInt(intensity)
+          }
         );
         
         return res.json({ 
@@ -228,24 +231,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Multiple makeup effects endpoint
+  app.post('/api/apply-multiple-makeup', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image provided' });
+      }
+
+      const { effects } = req.body;
+      let makeupEffects;
+      
+      try {
+        makeupEffects = JSON.parse(effects);
+      } catch (e) {
+        return res.status(400).json({ error: 'Invalid effects format' });
+      }
+      
+      const localResultPath = await makeupProcessor.applyMultipleMakeupEffects(
+        req.file.path,
+        makeupEffects
+      );
+      
+      res.json({ 
+        success: true, 
+        makeupImageUrl: `/${localResultPath}`,
+        originalImageUrl: `/uploads/${req.file.filename}`,
+        processingMethod: 'local'
+      });
+
+    } catch (error) {
+      console.error('Multiple makeup application error:', error);
+      res.status(500).json({ 
+        error: 'Failed to apply multiple makeup effects',
+        details: (error as Error).message 
+      });
+    }
+  });
+
   app.post('/api/age-progression', upload.single('image'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'No image provided' });
       }
 
-      const { targetAge = 40 } = req.body;
+      const { targetAge = 40, currentAge = 25 } = req.body;
       
-      const resultUrl = await aiProcessor.generateAgeProgression(
-        req.file.path, 
-        parseInt(targetAge)
-      );
-      
-      res.json({ 
-        success: true, 
-        agedImageUrl: resultUrl,
-        originalImageUrl: `/uploads/${req.file.filename}`
-      });
+      // Try AI first, fallback to local processing
+      try {
+        const aiRequest = {
+          imageUrl: req.file.path,
+          targetAge: parseInt(targetAge),
+          currentAge: parseInt(currentAge),
+        };
+
+        const aiResultUrl = await aiProcessor.progressAge ? 
+          await aiProcessor.progressAge(aiRequest) :
+          await aiProcessor.generateAgeProgression(req.file.path, parseInt(targetAge));
+        
+        return res.json({ 
+          success: true, 
+          agedImageUrl: aiResultUrl,
+          originalImageUrl: `/uploads/${req.file.filename}`,
+          processingMethod: 'ai'
+        });
+      } catch (aiError) {
+        console.log('AI age progression failed, using local processing:', (aiError as Error).message);
+        
+        // Fallback to local age progression
+        const localResultPath = await makeupProcessor.applyAgeProgression(
+          req.file.path,
+          parseInt(targetAge),
+          parseInt(currentAge)
+        );
+        
+        return res.json({ 
+          success: true, 
+          agedImageUrl: `/${localResultPath}`,
+          originalImageUrl: `/uploads/${req.file.filename}`,
+          processingMethod: 'local'
+        });
+      }
 
     } catch (error) {
       console.error('Age progression error:', error);

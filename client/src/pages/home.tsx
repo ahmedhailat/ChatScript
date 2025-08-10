@@ -5,6 +5,7 @@ import AIVisualization from "@/components/ai-visualization";
 import AIPreviewGenerator from "@/components/ai-preview-generator";
 import FaceAreaSelector from "@/components/face-area-selector";
 import LiveMakeupOverlay from "@/components/live-makeup-overlay";
+import EnhancedMakeupStudio from "@/components/enhanced-makeup-studio";
 import ConsultationForm from "@/components/consultation-form";
 import SampleGallery from "@/components/sample-gallery";
 import Footer from "@/components/footer";
@@ -61,10 +62,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* Live Makeup Tool (when enabled) */}
+        {/* Enhanced Makeup Studio (when enabled) */}
         {showMakeupTool && beforeImage && (
           <div className="mb-8">
-            <LiveMakeupOverlay
+            <EnhancedMakeupStudio
               image={beforeImage}
               onMakeupApplied={setAfterImage}
             />
@@ -102,7 +103,7 @@ export default function Home() {
                   onClick={() => setShowMakeupTool(!showMakeupTool)}
                   className="w-full px-4 py-2 bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200 transition-colors"
                 >
-                  {showMakeupTool ? 'Hide' : 'Show'} Live Makeup Tool
+                  {showMakeupTool ? 'Hide' : 'Show'} Enhanced Makeup Studio
                 </button>
               </div>
             )}
