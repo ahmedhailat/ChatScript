@@ -3,6 +3,8 @@ import CameraCapture from "@/components/camera-capture";
 import ProcedureSelection from "@/components/procedure-selection";
 import AIVisualization from "@/components/ai-visualization";
 import AIPreviewGenerator from "@/components/ai-preview-generator";
+import FaceAreaSelector from "@/components/face-area-selector";
+import LiveMakeupOverlay from "@/components/live-makeup-overlay";
 import ConsultationForm from "@/components/consultation-form";
 import SampleGallery from "@/components/sample-gallery";
 import Footer from "@/components/footer";
@@ -13,6 +15,9 @@ export default function Home() {
   const [beforeImage, setBeforeImage] = useState<string | null>(null);
   const [afterImage, setAfterImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showAreaSelector, setShowAreaSelector] = useState(false);
+  const [showMakeupTool, setShowMakeupTool] = useState(false);
+  const [faceSelections, setFaceSelections] = useState<any>(null);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -45,6 +50,27 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Face Area Selector (when enabled) */}
+        {showAreaSelector && beforeImage && (
+          <div className="mb-8">
+            <FaceAreaSelector
+              image={beforeImage}
+              selectedProcedure={selectedProcedure}
+              onAreasSelected={setFaceSelections}
+            />
+          </div>
+        )}
+
+        {/* Live Makeup Tool (when enabled) */}
+        {showMakeupTool && beforeImage && (
+          <div className="mb-8">
+            <LiveMakeupOverlay
+              image={beforeImage}
+              onMakeupApplied={setAfterImage}
+            />
+          </div>
+        )}
+
         {/* Main Workflow Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column */}
@@ -63,6 +89,23 @@ export default function Home() {
               onPreviewGenerated={setAfterImage}
               disabled={isProcessing}
             />
+            
+            {beforeImage && (
+              <div className="mt-4 space-y-2">
+                <button 
+                  onClick={() => setShowAreaSelector(!showAreaSelector)}
+                  className="w-full px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                >
+                  {showAreaSelector ? 'Hide' : 'Show'} Precise Area Selection
+                </button>
+                <button 
+                  onClick={() => setShowMakeupTool(!showMakeupTool)}
+                  className="w-full px-4 py-2 bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200 transition-colors"
+                >
+                  {showMakeupTool ? 'Hide' : 'Show'} Live Makeup Tool
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Center Column */}
@@ -85,6 +128,12 @@ export default function Home() {
                   formData.append('image', blob, 'photo.jpg');
                   formData.append('procedureType', selectedProcedure);
                   formData.append('intensity', '60'); // Default intensity
+                  
+                  // Include face area selections if available
+                  if (faceSelections) {
+                    formData.append('areas', JSON.stringify(faceSelections.areas || {}));
+                    formData.append('adjustments', JSON.stringify(faceSelections.adjustments || {}));
+                  }
                   
                   const apiResponse = await fetch('/api/generate-surgical-preview', {
                     method: 'POST',

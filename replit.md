@@ -1,6 +1,6 @@
 # Overview
 
-MedVision AI is a surgical visualization platform that uses artificial intelligence to predict and visualize potential outcomes of medical procedures. The application allows medical professionals to upload patient images, select procedure types (rhinoplasty, dental restoration, facial contouring, scar removal), and generate AI-powered before/after visualizations. It's designed as a HIPAA-compliant, secure platform specifically for medical professionals to help patients visualize potential surgical outcomes.
+MedVision AI is a comprehensive surgical visualization platform that combines OpenAI-powered artificial intelligence with local image processing to predict and visualize potential outcomes of medical procedures. The application allows medical professionals to upload patient images, select precise face areas (nose, lips, teeth, chin), and generate realistic before/after visualizations with granular control over surgical adjustments. Features include real AI processing, precise area selection tools, live makeup application, and fallback local processing when API quotas are exceeded. It's designed as a HIPAA-compliant, secure platform specifically for medical professionals to help patients visualize potential surgical outcomes with life-like precision.
 
 # User Preferences
 
@@ -41,11 +41,15 @@ Currently implements a basic structure for user management:
 - **Security**: Prepared for HIPAA compliance with secure session management
 
 ## Core Features
-The application provides several key medical visualization features:
+The application provides comprehensive medical visualization capabilities:
 
 - **Image Capture**: Camera integration and file upload capabilities with validation
 - **Procedure Selection**: Radio group interface for selecting procedure types (rhinoplasty, dental, facial contouring, scar removal)
-- **AI Processing**: Mock AI visualization system that processes before images to generate predicted outcomes
+- **AI Processing**: Real OpenAI integration for authentic surgical previews with fallback to local Sharp-based image processing
+- **Precise Area Selection**: Interactive face area selector allowing users to select specific regions (nose, lips, teeth, chin) with pixel-perfect control
+- **Live Makeup Application**: Real-time makeup overlay tool with brush controls, color palette, and intensity adjustment
+- **Surgical Adjustments**: Granular controls for nose width/length, teeth whitening/straightening, lip size, and chin shape with slider-based precision
+- **Dual Processing Methods**: Automatic failover from AI to local processing ensuring 100% uptime regardless of API availability
 - **Consultation Management**: Form-based patient data collection and consultation note management
 - **Gallery**: Sample transformations showcase for reference
 

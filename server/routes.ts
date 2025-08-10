@@ -8,6 +8,7 @@ import multer, { type MulterError } from "multer";
 import path from "path";
 import { randomUUID } from "crypto";
 import { aiProcessor } from "./ai-processor";
+import { imageProcessor } from "./image-processor";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -102,28 +103,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Visualization Endpoints
+  // Local Image Processing Endpoints (Fallback when OpenAI quota exceeded)
   app.post('/api/generate-surgical-preview', upload.single('image'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'No image provided' });
       }
 
-      const { procedureType, intensity = 50 } = req.body;
+      const { 
+        procedureType, 
+        intensity = 50,
+        areas = '{}',
+        adjustments = '{}'
+      } = req.body;
       
-      const request = {
-        imageUrl: req.file.path,
-        procedureType: procedureType || 'rhinoplasty',
-        intensity: parseInt(intensity),
-      };
+      // Parse face area selections and adjustments
+      const faceAreas = typeof areas === 'string' ? JSON.parse(areas) : areas;
+      const surgicalAdjustments = typeof adjustments === 'string' ? JSON.parse(adjustments) : adjustments;
+      
+      // First try OpenAI for best results
+      try {
+        const aiRequest = {
+          imageUrl: req.file.path,
+          procedureType: procedureType || 'rhinoplasty',
+          intensity: parseInt(intensity),
+        };
 
-      const resultUrl = await aiProcessor.generateSurgicalVisualization(request);
-      
-      res.json({ 
-        success: true, 
-        afterImageUrl: resultUrl,
-        originalImageUrl: `/uploads/${req.file.filename}`
-      });
+        const aiResultUrl = await aiProcessor.generateSurgicalVisualization(aiRequest);
+        
+        return res.json({ 
+          success: true, 
+          afterImageUrl: aiResultUrl,
+          originalImageUrl: `/uploads/${req.file.filename}`,
+          processingMethod: 'ai'
+        });
+      } catch (aiError) {
+        console.log('AI processing failed, using local processing:', (aiError as Error).message);
+        
+        // Fallback to local image processing
+        const localResultPath = await imageProcessor.processSurgicalPreview(
+          req.file.path,
+          procedureType || 'rhinoplasty',
+          faceAreas,
+          surgicalAdjustments,
+          parseInt(intensity)
+        );
+        
+        return res.json({ 
+          success: true, 
+          afterImageUrl: `/${localResultPath}`,
+          originalImageUrl: `/uploads/${req.file.filename}`,
+          processingMethod: 'local'
+        });
+      }
 
     } catch (error) {
       console.error('Surgical preview error:', error);
@@ -140,22 +172,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'No image provided' });
       }
 
-      const { makeupType, color, intensity = 50 } = req.body;
+      const { 
+        makeupType, 
+        color, 
+        intensity = 50,
+        area = '{"x": 0, "y": 0, "width": 400, "height": 400}'
+      } = req.body;
       
-      const request = {
-        imageUrl: req.file.path,
-        makeupType: makeupType || 'lipstick', 
-        color: color || '#FF6B6B',
-        intensity: parseInt(intensity),
-      };
+      // Parse makeup area
+      const makeupArea = typeof area === 'string' ? JSON.parse(area) : area;
+      
+      // First try OpenAI for best results
+      try {
+        const aiRequest = {
+          imageUrl: req.file.path,
+          makeupType: makeupType || 'lipstick', 
+          color: color || '#FF6B6B',
+          intensity: parseInt(intensity),
+        };
 
-      const resultUrl = await aiProcessor.applyMakeup(request);
-      
-      res.json({ 
-        success: true, 
-        makeupImageUrl: resultUrl,
-        originalImageUrl: `/uploads/${req.file.filename}`
-      });
+        const aiResultUrl = await aiProcessor.applyMakeup(aiRequest);
+        
+        return res.json({ 
+          success: true, 
+          makeupImageUrl: aiResultUrl,
+          originalImageUrl: `/uploads/${req.file.filename}`,
+          processingMethod: 'ai'
+        });
+      } catch (aiError) {
+        console.log('AI makeup failed, using local processing:', (aiError as Error).message);
+        
+        // Fallback to local image processing
+        const localResultPath = await imageProcessor.applyMakeupEffect(
+          req.file.path,
+          makeupType || 'lipstick',
+          color || '#FF6B6B',
+          makeupArea,
+          parseInt(intensity)
+        );
+        
+        return res.json({ 
+          success: true, 
+          makeupImageUrl: `/${localResultPath}`,
+          originalImageUrl: `/uploads/${req.file.filename}`,
+          processingMethod: 'local'
+        });
+      }
 
     } catch (error) {
       console.error('Makeup application error:', error);
