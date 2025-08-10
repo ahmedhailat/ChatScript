@@ -284,9 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentAge: parseInt(currentAge),
         };
 
-        const aiResultUrl = await aiProcessor.progressAge ? 
-          await aiProcessor.progressAge(aiRequest) :
-          await aiProcessor.generateAgeProgression(req.file.path, parseInt(targetAge));
+        const aiResultUrl = await aiProcessor.generateAgeProgression(req.file.path, parseInt(targetAge));
         
         return res.json({ 
           success: true, 
@@ -294,8 +292,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           originalImageUrl: `/uploads/${req.file.filename}`,
           processingMethod: 'ai'
         });
-      } catch (aiError) {
-        console.log('AI age progression failed, using local processing:', (aiError as Error).message);
+      } catch (aiError: any) {
+        console.log('AI age progression failed, using local processing:', aiError.message);
         
         // Fallback to local age progression
         const localResultPath = await makeupProcessor.applyAgeProgression(
