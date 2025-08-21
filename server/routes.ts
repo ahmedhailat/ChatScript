@@ -14,6 +14,7 @@ import { makeupProcessor } from "./makeup-processor";
 import { FaceEffectsProcessor } from "./face-effects-processor";
 import { NoseBeautificationProcessor } from "./nose-beautification-processor";
 import { VirtualRhinoplastyProcessor } from "./virtual-rhinoplasty-processor";
+import { opencvProcessor } from "./opencv-face-processor";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
 const noseBeautificationProcessor = new NoseBeautificationProcessor();
@@ -669,6 +670,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: 'حدث خطأ أثناء تحليل الأنف',
         error: error instanceof Error ? error.message : 'خطأ غير معروف'
+      });
+    }
+  });
+
+  // MediaPipe face landmarks detection endpoint
+  app.post('/api/mediapipe-landmarks', upload.single('image'), async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'صورة مطلوبة' });
+    }
+
+    try {
+      console.log('🎯 بدء كشف معالم الوجه باستخدام MediaPipe...');
+      
+      const landmarks = await opencvProcessor.detectFaceLandmarks(req.file.path);
+      
+      if (landmarks) {
+        res.json({
+          success: true,
+          landmarks: landmarks,
+          totalPoints: landmarks.total_points,
+          confidence: landmarks.confidence,
+          imageSize: landmarks.image_size,
+          processingMethod: 'mediapipe'
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: 'لم يتم العثور على وجه في الصورة'
+        });
+      }
+    } catch (error: any) {
+      console.error('Error in MediaPipe landmarks detection:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'فشل في كشف معالم الوجه',
+        error: error.message 
+      });
+    }
+  });
+
+  // MediaPipe makeup application endpoint
+  app.post('/api/mediapipe-makeup', upload.single('image'), async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'صورة مطلوبة' });
+    }
+
+    try {
+      console.log('💄 تطبيق المكياج باستخدام MediaPipe...');
+      
+      const makeupConfig = {
+        lipstick: req.body.makeupType === 'lipstick' ? {
+          color: req.body.color || '#FF1744',
+          intensity: (req.body.intensity || 70) / 100
+        } : undefined,
+        eyeshadow: req.body.makeupType === 'eyeshadow' ? {
+          color: req.body.color || '#8D6E63',
+          intensity: (req.body.intensity || 60) / 100
+        } : undefined,
+        blush: req.body.makeupType === 'blush' ? {
+          color: req.body.color || '#F8BBD9',
+          intensity: (req.body.intensity || 50) / 100,
+          radius: 30
+        } : undefined,
+        eyeliner: req.body.makeupType === 'eyeliner' ? {
+          color: req.body.color || '#000000',
+          thickness: parseInt(req.body.thickness) || 2
+        } : undefined,
+        foundation: req.body.makeupType === 'foundation' ? {
+          intensity: (req.body.intensity || 40) / 100
+        } : undefined
+      };
+
+      const resultPath = await opencvProcessor.applyProfessionalMakeup(req.file.path, makeupConfig);
+      
+      if (resultPath) {
+        // Create comparison image
+        const comparisonPath = await opencvProcessor.createBeforeAfterComparison(
+          req.file.path,
+          resultPath,
+          `مكياج ${req.body.makeupType} باستخدام MediaPipe`
+        );
+
+        res.json({
+          success: true,
+          makeupImageUrl: `/${resultPath}`,
+          originalImageUrl: `/${req.file.path}`,
+          comparisonImageUrl: comparisonPath ? `/${comparisonPath}` : null,
+          processingMethod: 'mediapipe',
+          makeupType: req.body.makeupType,
+          settings: {
+            color: req.body.color,
+            intensity: req.body.intensity
+          }
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'فشل في تطبيق المكياج'
+        });
+      }
+    } catch (error: any) {
+      console.error('Error in MediaPipe makeup:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'فشل في تطبيق المكياج باستخدام MediaPipe',
+        error: error.message 
       });
     }
   });
