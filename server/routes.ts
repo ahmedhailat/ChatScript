@@ -17,7 +17,7 @@ import { VirtualRhinoplastyProcessor } from "./virtual-rhinoplasty-processor";
 import { opencvProcessor } from "./opencv-face-processor";
 import { registerConsultationRoutes } from "./consultation-routes";
 import { seedDoctors } from "./seed-doctors";
-import { ultraPrecisionLip } from "./ultra-precision-lip";
+import { advancedAILipProcessor } from "./advanced-ai-lip-processor";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
 const noseBeautificationProcessor = new NoseBeautificationProcessor();
@@ -435,13 +435,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Applying precision ${region} makeup with color ${color}, intensity ${intensity}%, texture ${texture}`);
 
       if (region === 'lips') {
-        // Use simple precision lip processor for accurate lip application
+        // Use advanced AI lip processor for DeepMind-level precision
         try {
-          const processedImageUrl = await ultraPrecisionLip.applyUltraPreciseLipstick(
+          const processedImageUrl = await advancedAILipProcessor.applyAILipstick(
             req.file.path,
             {
               color,
-              intensity: parseInt(intensity)
+              intensity: parseInt(intensity),
+              texture: (texture as any) || 'satin'
             }
           );
 

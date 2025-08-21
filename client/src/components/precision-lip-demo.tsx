@@ -99,8 +99,8 @@ export default function PrecisionLipDemo({ initialImage }: PrecisionLipDemoProps
         setProcessedImage(makeupResult.processedImageUrl);
         
         toast({
-          title: "✅ تم التطبيق بنجاح",
-          description: "تم تطبيق أحمر الشفاه داخل الحدود فقط",
+          title: "✅ تم التطبيق بالذكاء الاصطناعي",
+          description: "نظام DeepMind AI طبق المكياج بدقة مطلقة داخل الحدود",
         });
       } else {
         throw new Error(makeupResult.error || 'فشل في تطبيق المكياج');
@@ -148,11 +148,11 @@ export default function PrecisionLipDemo({ initialImage }: PrecisionLipDemoProps
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center">
             <Target className="ml-2 w-6 h-6 text-pink-600" />
-            تطبيق أحمر الشفاه بدقة متناهية
+            نظام الذكاء الاصطناعي المتقدم للشفاه
           </div>
-          <Badge variant="outline" className="bg-gradient-to-r from-pink-50 to-red-50">
+          <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-purple-50">
             <CheckCircle className="w-3 h-3 ml-1" />
-            تقنية الحدود الدقيقة
+            تقنية DeepMind AI
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -272,7 +272,7 @@ export default function PrecisionLipDemo({ initialImage }: PrecisionLipDemoProps
               ) : (
                 <>
                   <Smile className="w-5 h-5 ml-2" />
-                  تطبيق أحمر الشفاه بدقة
+                  تطبيق بالذكاء الاصطناعي
                 </>
               )}
             </Button>
