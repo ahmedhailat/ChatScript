@@ -12,8 +12,10 @@ import { aiProcessor } from "./ai-processor";
 import { imageProcessor } from "./image-processor";
 import { makeupProcessor } from "./makeup-processor";
 import { FaceEffectsProcessor } from "./face-effects-processor";
+import { NoseBeautificationProcessor } from "./nose-beautification-processor";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
+const noseBeautificationProcessor = new NoseBeautificationProcessor();
 
 // Configure multer for file uploads
 const upload = multer({
@@ -145,7 +147,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (aiError) {
         console.log('AI processing failed, using local processing:', (aiError as Error).message);
         
-        // Fallback to local image processing
+        // Use specialized nose beautification for rhinoplasty
+        if (procedureType === 'rhinoplasty' || procedureType === 'nose_surgery') {
+          const noseResultPath = await noseBeautificationProcessor.beautifyNose(
+            req.file.path,
+            {
+              type: 'refinement',
+              intensity: parseInt(intensity) || 60,
+              preserveNaturalLook: true
+            }
+          );
+          
+          return res.json({ 
+            success: true, 
+            afterImageUrl: `/${noseResultPath}`,
+            originalImageUrl: `/uploads/${req.file.filename}`,
+            processingMethod: 'nose_beautification'
+          });
+        }
+        
+        // Fallback to local image processing for other procedures
         const localResultPath = await imageProcessor.processSurgicalPreview(
           req.file.path,
           procedureType || 'rhinoplasty',
@@ -565,6 +586,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false,
         message: 'حدث خطأ في تحليل الوجه',
+        error: error instanceof Error ? error.message : 'خطأ غير معروف'
+      });
+    }
+  });
+
+  // Advanced nose beautification endpoint
+  app.post('/api/nose-beautification', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'لم يتم رفع أي صورة' });
+      }
+
+      const { 
+        type = 'refinement', 
+        intensity = 60,
+        preserveNaturalLook = true 
+      } = req.body;
+
+      console.log(`👃 بدء تجميل الأنف: ${type} بشدة ${intensity}%`);
+
+      const beautifiedPath = await noseBeautificationProcessor.beautifyNose(
+        req.file.path,
+        {
+          type,
+          intensity: parseInt(intensity),
+          preserveNaturalLook: preserveNaturalLook === 'true'
+        }
+      );
+
+      // Generate comparison image
+      const comparisonPath = await noseBeautificationProcessor.createBeforeAfterComparison(
+        req.file.path,
+        beautifiedPath
+      );
+
+      res.json({
+        success: true,
+        beautifiedImageUrl: `/${beautifiedPath}`,
+        comparisonImageUrl: `/${comparisonPath}`,
+        originalImageUrl: `/uploads/${req.file.filename}`,
+        type,
+        intensity: parseInt(intensity),
+        message: 'تم تجميل الأنف بنجاح!'
+      });
+
+    } catch (error) {
+      console.error('خطأ في تجميل الأنف:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'حدث خطأ أثناء تجميل الأنف',
+        error: error instanceof Error ? error.message : 'خطأ غير معروف'
+      });
+    }
+  });
+
+  // Nose analysis endpoint
+  app.post('/api/analyze-nose', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'لم يتم رفع أي صورة' });
+      }
+
+      console.log('🔍 تحليل ملامح الأنف...');
+      
+      const analysisResult = await noseBeautificationProcessor.analyzeAndRecommend(
+        req.file.path
+      );
+
+      res.json({
+        success: true,
+        analysis: analysisResult.analysis,
+        recommendations: analysisResult.recommendations,
+        message: 'تم تحليل الأنف بنجاح!'
+      });
+
+    } catch (error) {
+      console.error('خطأ في تحليل الأنف:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'حدث خطأ أثناء تحليل الأنف',
         error: error instanceof Error ? error.message : 'خطأ غير معروف'
       });
     }
