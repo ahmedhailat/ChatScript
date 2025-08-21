@@ -1,6 +1,7 @@
 import { ProfessionalFaceAppStudio } from "@/components/professional-faceapp-studio";
+import EnhancedPrecisionMakeup from "@/components/enhanced-precision-makeup";
 import DemoVideoMaker from "@/components/demo-video-maker";
-import { ArrowLeft, Wand2, Video } from "lucide-react";
+import { ArrowLeft, Wand2, Video, Target } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,8 +36,12 @@ export default function FaceAppPage() {
       {/* Main Content with Tabs */}
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4">
-          <Tabs defaultValue="studio" className="w-full" dir="rtl">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-6">
+          <Tabs defaultValue="precision" className="w-full" dir="rtl">
+            <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto mb-6">
+              <TabsTrigger value="precision" className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                المكياج الدقيق
+              </TabsTrigger>
               <TabsTrigger value="studio" className="flex items-center gap-2">
                 <Wand2 className="w-4 h-4" />
                 الاستوديو المهني
@@ -46,6 +51,12 @@ export default function FaceAppPage() {
                 العرض التوضيحي
               </TabsTrigger>
             </TabsList>
+            
+            <TabsContent value="precision">
+              <EnhancedPrecisionMakeup 
+                initialImage="/attached_assets/WhatsApp Image 2025-08-21 at 11.13.13_23f16f2f_1755764012623.jpg"
+              />
+            </TabsContent>
             
             <TabsContent value="studio">
               <ProfessionalFaceAppStudio />

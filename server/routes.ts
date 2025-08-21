@@ -420,6 +420,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced MediaPipe landmarks detection
+  app.post("/api/enhanced-mediapipe-landmarks", upload.single("image"), async (req, res) => {
+    console.log("🎯 Enhanced MediaPipe landmarks request received");
+    
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file provided" });
+      }
+
+      // استخدام نظام MediaPipe المحسن مع كشف دقيق للملامح
+      const landmarks = await opencvProcessor.detectPreciseLandmarks(req.file.path);
+      
+      if (!landmarks.success) {
+        throw new Error(landmarks.error || 'فشل في كشف ملامح الوجه');
+      }
+
+      // تحسين البيانات المعادة
+      const enhancedResponse = {
+        success: true,
+        landmarks: landmarks.landmarks,
+        regions: {
+          lips: {
+            points: landmarks.landmarks ? landmarks.landmarks.slice(61, 68).concat(landmarks.landmarks.slice(291, 299)) : [],
+            boundingBox: { x: 42, y: 62, width: 16, height: 8 }
+          },
+          eyes: {
+            points: landmarks.landmarks ? landmarks.landmarks.slice(33, 42).concat(landmarks.landmarks.slice(362, 374)) : [],
+            boundingBox: { x: 35, y: 40, width: 30, height: 12 }
+          },
+          cheeks: {
+            points: landmarks.landmarks ? [landmarks.landmarks[116], landmarks.landmarks[117], landmarks.landmarks[345], landmarks.landmarks[346]].filter(Boolean) : [],
+            boundingBox: { x: 25, y: 50, width: 50, height: 20 }
+          },
+          forehead: {
+            points: landmarks.landmarks ? [landmarks.landmarks[10], landmarks.landmarks[151], landmarks.landmarks[9], landmarks.landmarks[8]].filter(Boolean) : [],
+            boundingBox: { x: 30, y: 15, width: 40, height: 25 }
+          }
+        },
+        confidence: landmarks.confidence || 0.9,
+        imageUrl: `/uploads/${req.file.filename}`,
+        totalLandmarks: landmarks.landmarks ? landmarks.landmarks.length : 0
+      };
+
+      res.json(enhancedResponse);
+
+    } catch (error) {
+      console.error('Enhanced MediaPipe landmarks error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'فشل في كشف ملامح الوجه المحسن',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Precision makeup application endpoint
+  app.post("/api/apply-precision-makeup", upload.single("image"), async (req, res) => {
+    console.log("💄 Precision makeup request received");
+    
+    try {
+      const { region, color, intensity = 70, texture = 'gloss' } = req.body;
+      
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file provided" });
+      }
+
+      if (!region) {
+        return res.status(400).json({ error: "Makeup region not specified" });
+      }
+
+      console.log(`🎨 Applying ${region} makeup with color ${color} at ${intensity}% intensity`);
+
+      // تطبيق المكياج الدقيق حسب المنطقة
+      let processedImagePath;
+      
+      switch(region) {
+        case 'lips':
+          processedImagePath = await makeupProcessor.applyLipstick(
+            req.file.path, 
+            color, 
+            parseInt(intensity), 
+            texture
+          );
+          break;
+        case 'eyes':
+          processedImagePath = await makeupProcessor.applyEyeshadow(
+            req.file.path, 
+            color, 
+            parseInt(intensity)
+          );
+          break;
+        case 'cheeks':
+          processedImagePath = await makeupProcessor.applyBlush(
+            req.file.path, 
+            color, 
+            parseInt(intensity)
+          );
+          break;
+        case 'forehead':
+          processedImagePath = await makeupProcessor.applyHighlight(
+            req.file.path, 
+            color, 
+            parseInt(intensity)
+          );
+          break;
+        default:
+          throw new Error(`منطقة غير مدعومة: ${region}`);
+      }
+
+      res.json({
+        success: true,
+        processedImageUrl: `/${processedImagePath}`,
+        originalImageUrl: `/uploads/${req.file.filename}`,
+        appliedRegion: region,
+        color: color,
+        intensity: parseInt(intensity),
+        texture: texture,
+        processingMethod: 'precision-landmarks'
+      });
+
+    } catch (error) {
+      console.error('Precision makeup application error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'فشل في تطبيق المكياج الدقيق',
+        details: (error as Error).message 
+      });
+    }
+  });
+
   // Face effects endpoint (FaceApp-style)
   app.post("/api/apply-face-effect", upload.single("image"), async (req, res) => {
     console.log("🎭 Face effect request received");
