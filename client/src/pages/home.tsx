@@ -38,14 +38,20 @@ export default function Home() {
               آمن ومتوافق مع معايير HIPAA ومصمم للمهنيين الطبيين.
             </p>
             
-            {/* Quick Test Button */}
-            <div className="mb-4">
+            {/* Quick Action Buttons */}
+            <div className="flex gap-4 mb-4">
               <button
                 onClick={() => window.scrollTo({ top: 600, behavior: 'smooth' })}
                 className="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg font-bold"
               >
                 🧪 اختبار سريع للنظام
               </button>
+              <a 
+                href="/tutorial"
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold no-underline"
+              >
+                📺 شاهد الفيديو التعليمي التفاعلي
+              </a>
             </div>
             
             <div className="flex items-center gap-6 text-sm" dir="rtl">
