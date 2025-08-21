@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { MakeupAreaSelector } from "@/components/makeup-area-selector";
+import { OpenSourceTutorial } from "@/components/open-source-tutorial";
 
 export function DemoVideoTutorial() {
-  const [activeDemo, setActiveDemo] = useState<'video' | 'interactive'>('video');
+  const [activeDemo, setActiveDemo] = useState<'video' | 'interactive' | 'opensource'>('opensource');
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -63,13 +64,13 @@ export function DemoVideoTutorial() {
             </p>
           </div>
           
-          <div className="flex justify-center gap-4 mt-4">
+          <div className="flex justify-center gap-3 mt-4">
             <Button
               variant={activeDemo === 'video' ? 'secondary' : 'outline'}
               onClick={() => setActiveDemo('video')}
               className="text-white border-white hover:bg-white/20"
             >
-              📹 الفيديو التوضيحي
+              📹 الفيديو المرجعي
             </Button>
             <Button
               variant={activeDemo === 'interactive' ? 'secondary' : 'outline'}
@@ -77,6 +78,13 @@ export function DemoVideoTutorial() {
               className="text-white border-white hover:bg-white/20"
             >
               🎨 التجربة التفاعلية
+            </Button>
+            <Button
+              variant={activeDemo === 'opensource' ? 'secondary' : 'outline'}
+              onClick={() => setActiveDemo('opensource')}
+              className="text-white border-white hover:bg-white/20"
+            >
+              🆓 فيديوهات مفتوحة المصدر
             </Button>
           </div>
         </CardHeader>
@@ -192,7 +200,7 @@ export function DemoVideoTutorial() {
                 </div>
               </div>
             </div>
-          ) : (
+          ) : activeDemo === 'interactive' ? (
             // Interactive Demo Section
             <div className="p-6">
               <div className="text-center mb-6">
@@ -203,6 +211,18 @@ export function DemoVideoTutorial() {
               </div>
               
               <MakeupAreaSelector />
+            </div>
+          ) : (
+            // Open Source Videos Section
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold mb-2">🆓 فيديوهات تعليمية مفتوحة المصدر</h3>
+                <p className="text-gray-600">
+                  مجموعة شاملة من الفيديوهات التعليمية عالية الجودة متاحة مجاناً
+                </p>
+              </div>
+              
+              <OpenSourceTutorial />
             </div>
           )}
         </CardContent>

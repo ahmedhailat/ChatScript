@@ -16,8 +16,8 @@ export default function TutorialPage() {
               <BookOpen className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">شرح FaceApp Studio</h1>
-              <p className="text-slate-600">فيديو تعليمي شامل لجميع تأثيرات تحرير الوجه</p>
+              <h1 className="text-2xl font-bold text-slate-900">مكتبة الفيديوهات التعليمية</h1>
+              <p className="text-slate-600">فيديوهات تعليمية شاملة مفتوحة المصدر لجميع تقنيات المكياج</p>
             </div>
           </div>
           
