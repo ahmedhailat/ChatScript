@@ -28,11 +28,23 @@ export class ImageProcessor {
     intensity: number = 50
   ): Promise<string> {
     try {
+      console.log('بدء المعالجة المحلية للصورة:', {
+        imagePath,
+        procedureType,
+        intensity
+      });
+
       const outputPath = path.join("uploads", `processed_${Date.now()}.jpg`);
       
       // Load the original image
       let image = sharp(imagePath);
       const metadata = await image.metadata();
+      
+      console.log('معلومات الصورة:', {
+        width: metadata.width,
+        height: metadata.height,
+        format: metadata.format
+      });
       
       // Apply general image enhancements first
       image = image
@@ -64,6 +76,8 @@ export class ImageProcessor {
       
       // Save the processed image
       await image.jpeg({ quality: 95 }).toFile(outputPath);
+      
+      console.log('تم حفظ الصورة المعالجة في:', outputPath);
       
       return outputPath;
       

@@ -12,6 +12,7 @@ import AreaMakeupTool from "@/components/area-makeup-tool";
 import ConsultationForm from "@/components/consultation-form";
 import SampleGallery from "@/components/sample-gallery";
 import Footer from "@/components/footer";
+import { SimpleAITest } from "@/components/simple-ai-test";
 import { useState } from "react";
 
 export default function Home() {
@@ -37,6 +38,16 @@ export default function Home() {
               آمن ومتوافق مع معايير HIPAA ومصمم للمهنيين الطبيين.
             </p>
             
+            {/* Quick Test Button */}
+            <div className="mb-4">
+              <button
+                onClick={() => window.scrollTo({ top: 600, behavior: 'smooth' })}
+                className="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg font-bold"
+              >
+                🧪 اختبار سريع للنظام
+              </button>
+            </div>
+            
             <div className="flex items-center gap-6 text-sm" dir="rtl">
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xs">✓</span>
@@ -52,6 +63,16 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Test Section */}
+        <div className="mb-8">
+          <SimpleAITest 
+            onResult={(imageUrl) => {
+              setAfterImage(imageUrl);
+              console.log('✅ تم إنشاء صورة جديدة:', imageUrl);
+            }}
+          />
         </div>
 
         {/* Face Area Selector (when enabled) */}

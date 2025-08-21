@@ -59,6 +59,11 @@ export default function AIPreviewGenerator({
     setProgress(0);
 
     try {
+      console.log('بدء توليد الصورة بالذكاء الاصطناعي:', {
+        procedureType,
+        hasBeforeImage: !!beforeImage
+      });
+
       // Simulate progress updates
       const progressInterval = setInterval(() => {
         setProgress(prev => Math.min(prev + 10, 90));
@@ -68,17 +73,30 @@ export default function AIPreviewGenerator({
       const response = await fetch(beforeImage);
       const blob = await response.blob();
       
+      console.log('تم تحويل الصورة إلى blob:', {
+        blobSize: blob.size,
+        blobType: blob.type
+      });
+      
       const formData = new FormData();
       formData.append('image', blob, 'medical-photo.jpg');
       formData.append('procedureType', procedureType);
       formData.append('intensity', '65'); // Moderate intensity for realistic results
+      
+      console.log('إرسال الطلب إلى الخادم...');
       
       const apiResponse = await fetch('/api/generate-surgical-preview', {
         method: 'POST',
         body: formData,
       });
       
+      console.log('استجابة الخادم:', {
+        status: apiResponse.status,
+        statusText: apiResponse.statusText
+      });
+      
       const result = await apiResponse.json();
+      console.log('نتيجة المعالجة:', result);
       
       clearInterval(progressInterval);
       setProgress(100);
