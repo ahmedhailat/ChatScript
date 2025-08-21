@@ -13,9 +13,11 @@ import { imageProcessor } from "./image-processor";
 import { makeupProcessor } from "./makeup-processor";
 import { FaceEffectsProcessor } from "./face-effects-processor";
 import { NoseBeautificationProcessor } from "./nose-beautification-processor";
+import { VirtualRhinoplastyProcessor } from "./virtual-rhinoplasty-processor";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
 const noseBeautificationProcessor = new NoseBeautificationProcessor();
+const virtualRhinoplastyProcessor = new VirtualRhinoplastyProcessor();
 
 // Configure multer for file uploads
 const upload = multer({
@@ -666,6 +668,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false,
         message: 'حدث خطأ أثناء تحليل الأنف',
+        error: error instanceof Error ? error.message : 'خطأ غير معروف'
+      });
+    }
+  });
+
+  // Virtual rhinoplasty endpoint - Complete surgical simulation
+  app.post('/api/virtual-rhinoplasty', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'لم يتم رفع أي صورة' });
+      }
+
+      const { 
+        surgeryType = 'refinement',
+        intensity = 70,
+        targetShape = 'natural',
+        preserveEthnicity = true 
+      } = req.body;
+
+      console.log(`🏥 بدء الجراحة الافتراضية: ${surgeryType}`);
+
+      const surgicalResult = await virtualRhinoplastyProcessor.performVirtualRhinoplasty(
+        req.file.path,
+        {
+          surgeryType,
+          intensity: parseInt(intensity),
+          targetShape,
+          preserveEthnicity: preserveEthnicity === 'true'
+        }
+      );
+
+      res.json({
+        success: true,
+        beforeImageUrl: `/${surgicalResult.beforeImagePath}`,
+        afterImageUrl: `/${surgicalResult.afterImagePath}`,
+        comparisonImageUrl: `/${surgicalResult.comparisonImagePath}`,
+        originalImageUrl: `/uploads/${req.file.filename}`,
+        surgicalDetails: surgicalResult.surgicalDetails,
+        surgeryType,
+        intensity: parseInt(intensity),
+        targetShape,
+        message: 'تم إجراء الجراحة الافتراضية بنجاح!'
+      });
+
+    } catch (error) {
+      console.error('خطأ في الجراحة الافتراضية:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'حدث خطأ أثناء الجراحة الافتراضية',
         error: error instanceof Error ? error.message : 'خطأ غير معروف'
       });
     }
