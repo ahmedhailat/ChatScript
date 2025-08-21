@@ -1,341 +1,318 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
 import { 
-  Paintbrush, 
-  Scissors, 
-  Eye, 
+  Brush, 
   Palette, 
-  Droplets, 
-  Sparkles,
-  Brush,
-  CircleDot,
-  Heart,
+  Scissors, 
+  Paintbrush,
   Wand2,
-  Eraser,
-  Undo2,
-  RotateCcw,
-  Download,
-  Share2
-} from 'lucide-react';
+  Eye,
+  Smile,
+  Heart,
+  Droplets,
+  Sparkles,
+  Circle,
+  Square,
+  Triangle
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface InteractiveMakeupToolsProps {
-  onToolSelect: (tool: string, config: any) => void;
-  onApplyMakeup: (config: any) => void;
-  isProcessing?: boolean;
+  image: string;
+  onToolUsed?: (tool: string, settings: any) => void;
 }
 
 export default function InteractiveMakeupTools({ 
-  onToolSelect, 
-  onApplyMakeup, 
-  isProcessing = false 
+  image, 
+  onToolUsed 
 }: InteractiveMakeupToolsProps) {
-  const [selectedTool, setSelectedTool] = useState<string>('');
-  const [selectedColor, setSelectedColor] = useState('#FF1744');
-  const [brushSize, setBrushSize] = useState(15);
-  const [intensity, setIntensity] = useState(70);
+  const [selectedTool, setSelectedTool] = useState('brush');
+  const [brushSize, setBrushSize] = useState([15]);
+  const [intensity, setIntensity] = useState([60]);
+  const [selectedColor, setSelectedColor] = useState('#FF6B6B');
+  const [isApplying, setIsApplying] = useState(false);
 
-  const makeupTools = [
+  const { toast } = useToast();
+
+  const tools = [
     { 
       id: 'brush', 
-      name: 'فرشاة أساس', 
-      icon: Paintbrush, 
-      color: '#8B4513',
-      makeupType: 'foundation'
+      name: 'فرشاة', 
+      icon: <Brush className="w-5 h-5" />, 
+      color: '#8B5CF6',
+      description: 'فرشاة مكياج ناعمة للتطبيق الدقيق'
     },
     { 
-      id: 'lipstick', 
-      name: 'أحمر شفاه', 
-      icon: Heart, 
-      color: '#FF1744',
-      makeupType: 'lipstick'
+      id: 'palette', 
+      name: 'لوحة ألوان', 
+      icon: <Palette className="w-5 h-5" />, 
+      color: '#F59E0B',
+      description: 'اختيار من مجموعة ألوان احترافية'
     },
     { 
-      id: 'eyeshadow', 
-      name: 'ظلال عيون', 
-      icon: Eye, 
-      color: '#8D6E63',
-      makeupType: 'eyeshadow'
+      id: 'scissors', 
+      name: 'أداة قص', 
+      icon: <Scissors className="w-5 h-5" />, 
+      color: '#EF4444',
+      description: 'قص وتحديد المناطق بدقة'
     },
     { 
-      id: 'blush', 
-      name: 'أحمر خدود', 
-      icon: CircleDot, 
-      color: '#F8BBD9',
-      makeupType: 'blush'
+      id: 'paintbrush', 
+      name: 'فرشاة رسم', 
+      icon: <Paintbrush className="w-5 h-5" />, 
+      color: '#10B981',
+      description: 'رسم تفاصيل دقيقة ومعقدة'
     },
     { 
-      id: 'eyeliner', 
-      name: 'كحل', 
-      icon: Brush, 
-      color: '#000000',
-      makeupType: 'eyeliner'
+      id: 'wand', 
+      name: 'عصا سحرية', 
+      icon: <Wand2 className="w-5 h-5" />, 
+      color: '#8B5CF6',
+      description: 'تطبيق تأثيرات فورية ومبهرة'
     },
     { 
-      id: 'mascara', 
-      name: 'ماسكارا', 
-      icon: Wand2, 
-      color: '#2D2D2D',
-      makeupType: 'mascara'
-    },
-    { 
-      id: 'highlighter', 
-      name: 'هايلايتر', 
-      icon: Sparkles, 
-      color: '#FFD700',
-      makeupType: 'highlighter'
-    },
-    { 
-      id: 'contour', 
-      name: 'كونتور', 
-      icon: Palette, 
-      color: '#8B6914',
-      makeupType: 'contour'
+      id: 'blender', 
+      name: 'أداة مزج', 
+      icon: <Circle className="w-5 h-5" />, 
+      color: '#F97316',
+      description: 'مزج الألوان والتدرجات بطبيعية'
     }
   ];
 
-  const utilityTools = [
-    { id: 'scissors', name: 'مقص', icon: Scissors, color: '#6B7280' },
-    { id: 'eraser', name: 'ممحاة', icon: Eraser, color: '#EF4444' },
-    { id: 'undo', name: 'تراجع', icon: Undo2, color: '#3B82F6' },
-    { id: 'reset', name: 'إعادة تعيين', icon: RotateCcw, color: '#F59E0B' }
-  ];
-
-  const colorPalette = [
-    // ألوان أحمر الشفاه
-    '#FF1744', '#E91E63', '#F06292', '#EC407A', '#AD1457',
-    // ألوان ظلال العيون
-    '#8D6E63', '#A1887F', '#BCAAA4', '#D7CCC8', '#5D4037',
-    // ألوان أحمر الخدود
-    '#F8BBD9', '#F48FB1', '#F06292', '#EC407A', '#E91E63',
-    // ألوان الكحل والماسكارا
-    '#000000', '#424242', '#616161', '#757575', '#2D2D2D',
-    // ألوان هايلايتر
-    '#FFD700', '#FFC107', '#FFEB3B', '#CDDC39', '#8BC34A',
-    // ألوان كونتور
-    '#8B6914', '#A0522D', '#CD853F', '#DEB887', '#F4A460'
-  ];
-
-  const handleToolSelect = (tool: any) => {
-    setSelectedTool(tool.id);
-    if (tool.makeupType) {
-      setSelectedColor(tool.color);
-      onToolSelect(tool.makeupType, {
-        color: tool.color,
-        intensity: intensity / 100,
-        brushSize
-      });
+  const makeupCategories = [
+    { 
+      id: 'lips', 
+      name: 'الشفاه', 
+      icon: <Smile className="w-4 h-4" />, 
+      colors: ['#FF6B6B', '#DC2626', '#BE185D', '#A21CAF', '#EC4899', '#F472B6', '#FB7185', '#F87171']
+    },
+    { 
+      id: 'eyes', 
+      name: 'العيون', 
+      icon: <Eye className="w-4 h-4" />, 
+      colors: ['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95', '#3730A3', '#1E40AF', '#1D4ED8']
+    },
+    { 
+      id: 'cheeks', 
+      name: 'الخدود', 
+      icon: <Heart className="w-4 h-4" />, 
+      colors: ['#F87171', '#EF4444', '#DC2626', '#F97316', '#EA580C', '#D97706', '#FB7185', '#EC4899']
+    },
+    { 
+      id: 'foundation', 
+      name: 'كريم الأساس', 
+      icon: <Droplets className="w-4 h-4" />, 
+      colors: ['#F3E5AB', '#E6D3A3', '#D4A574', '#C4956C', '#B4856A', '#A47564', '#946558', '#84554C']
     }
-  };
+  ];
 
-  const handleApplyMakeup = () => {
-    const selectedMakeupTool = makeupTools.find(tool => tool.id === selectedTool);
-    if (selectedMakeupTool?.makeupType) {
-      onApplyMakeup({
-        makeupType: selectedMakeupTool.makeupType,
-        color: selectedColor,
-        intensity,
-        brushSize
+  const applyTool = async () => {
+    setIsApplying(true);
+    
+    try {
+      const settings = {
+        tool: selectedTool,
+        brushSize: brushSize[0],
+        intensity: intensity[0],
+        color: selectedColor
+      };
+      
+      // Simulate tool application
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      if (onToolUsed) {
+        onToolUsed(selectedTool, settings);
+      }
+      
+      const tool = tools.find(t => t.id === selectedTool);
+      toast({
+        title: "تم تطبيق الأداة",
+        description: `تم استخدام ${tool?.name} بنجاح`,
       });
+    } catch (error) {
+      toast({
+        title: "خطأ في التطبيق",
+        description: "فشل في تطبيق الأداة",
+        variant: "destructive"
+      });
+    } finally {
+      setIsApplying(false);
     }
   };
 
   return (
-    <div className="w-full space-y-4 bg-gradient-to-b from-pink-50/50 to-purple-50/50 p-4 rounded-lg border border-pink-200">
-      {/* عنوان الأدوات */}
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-purple-800 mb-2">
-          🎨 أدوات المكياج التفاعلية
-        </h3>
-        <p className="text-sm text-gray-600">
-          اختر أداة المكياج وابدأ التطبيق على الصورة
-        </p>
-      </div>
-
-      {/* أدوات المكياج الرئيسية */}
-      <Card className="border-pink-200">
-        <CardContent className="p-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">أدوات المكياج</h4>
-          <div className="grid grid-cols-4 gap-3">
-            {makeupTools.map((tool) => {
-              const Icon = tool.icon;
-              return (
-                <Button
-                  key={tool.id}
-                  variant={selectedTool === tool.id ? "default" : "outline"}
-                  size="sm"
-                  className={`h-16 flex-col gap-1 relative ${
-                    selectedTool === tool.id 
-                      ? 'bg-purple-500 hover:bg-purple-600 text-white border-purple-600' 
-                      : 'hover:bg-pink-50 hover:border-pink-300'
-                  }`}
-                  onClick={() => handleToolSelect(tool)}
-                  data-testid={`tool-${tool.id}`}
-                >
-                  <Icon 
-                    size={20} 
-                    style={{ color: selectedTool === tool.id ? 'white' : tool.color }}
-                  />
-                  <span className="text-xs leading-tight">{tool.name}</span>
-                  {selectedTool === tool.id && (
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 bg-pink-500">
-                      ✓
-                    </Badge>
-                  )}
-                </Button>
-              );
-            })}
+    <Card className="p-6" dir="rtl">
+      <CardHeader className="px-0 pt-0">
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Sparkles className="ml-2 w-6 h-6 text-purple-600" />
+            أدوات المكياج التفاعلية
           </div>
-        </CardContent>
-      </Card>
+          <Badge variant="secondary" className="bg-gradient-to-r from-purple-100 to-pink-100">
+            Professional Tools
+          </Badge>
+        </CardTitle>
+      </CardHeader>
 
-      {/* لوحة الألوان */}
-      {selectedTool && makeupTools.find(t => t.id === selectedTool)?.makeupType && (
-        <Card className="border-pink-200">
-          <CardContent className="p-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">لوحة الألوان</h4>
-            <div className="grid grid-cols-10 gap-2">
-              {colorPalette.map((color, index) => (
-                <button
-                  key={index}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    selectedColor === color 
-                      ? 'border-purple-600 scale-110 shadow-lg' 
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setSelectedColor(color)}
-                  data-testid={`color-${color}`}
+      <CardContent className="px-0">
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Tools panel */}
+          <div className="space-y-6">
+            {/* Tool selection */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">اختر أداتك:</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {tools.map(tool => (
+                  <Button
+                    key={tool.id}
+                    variant={selectedTool === tool.id ? "default" : "outline"}
+                    onClick={() => setSelectedTool(tool.id)}
+                    className="h-auto p-4 flex flex-col items-center space-y-2 relative"
+                    style={{
+                      borderColor: selectedTool === tool.id ? tool.color : undefined,
+                      backgroundColor: selectedTool === tool.id ? tool.color : undefined
+                    }}
+                  >
+                    {tool.icon}
+                    <span className="text-sm font-medium">{tool.name}</span>
+                    {selectedTool === tool.id && (
+                      <Badge className="absolute -top-2 -right-2 bg-green-500">
+                        <Sparkles className="w-3 h-3" />
+                      </Badge>
+                    )}
+                  </Button>
+                ))}
+              </div>
+              
+              {selectedTool && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600">
+                    {tools.find(t => t.id === selectedTool)?.description}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Color palette for makeup categories */}
+            <div>
+              <h4 className="font-semibold mb-3">فئات المكياج والألوان:</h4>
+              <div className="space-y-4">
+                {makeupCategories.map(category => (
+                  <div key={category.id} className="space-y-2">
+                    <div className="flex items-center space-x-2 gap-2">
+                      {category.icon}
+                      <span className="text-sm font-medium">{category.name}</span>
+                    </div>
+                    <div className="grid grid-cols-8 gap-2">
+                      {category.colors.map((color, index) => (
+                        <button
+                          key={`${category.id}-${index}`}
+                          onClick={() => setSelectedColor(color)}
+                          className={`w-8 h-8 rounded-full border-2 transition-all ${
+                            selectedColor === color ? 'border-gray-800 scale-110 ring-2 ring-blue-400' : 'border-gray-300'
+                          }`}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tool controls */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  حجم الأداة: {brushSize[0]}px
+                </label>
+                <Slider
+                  value={brushSize}
+                  onValueChange={setBrushSize}
+                  max={50}
+                  min={5}
+                  step={1}
+                  className="w-full"
                 />
-              ))}
-            </div>
-            
-            {/* لون مخصص */}
-            <div className="mt-3 flex items-center gap-2">
-              <label className="text-xs text-gray-600">لون مخصص:</label>
-              <input
-                type="color"
-                value={selectedColor}
-                onChange={(e) => setSelectedColor(e.target.value)}
-                className="w-8 h-8 rounded border"
-                data-testid="custom-color-picker"
-              />
-              <span className="text-xs text-gray-500">{selectedColor}</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              </div>
 
-      {/* إعدادات الأداة */}
-      {selectedTool && makeupTools.find(t => t.id === selectedTool)?.makeupType && (
-        <Card className="border-pink-200">
-          <CardContent className="p-4 space-y-4">
-            <h4 className="text-sm font-medium text-gray-700">إعدادات الأداة</h4>
-            
-            {/* حجم الفرشاة */}
-            <div>
-              <label className="text-xs text-gray-600 block mb-2">
-                حجم الفرشاة: {brushSize}px
-              </label>
-              <Slider
-                value={[brushSize]}
-                onValueChange={(value) => setBrushSize(value[0])}
-                max={50}
-                min={5}
-                step={5}
-                className="w-full"
-                data-testid="brush-size-slider"
-              />
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  قوة التأثير: {intensity[0]}%
+                </label>
+                <Slider
+                  value={intensity}
+                  onValueChange={setIntensity}
+                  max={100}
+                  min={10}
+                  step={5}
+                  className="w-full"
+                />
+              </div>
             </div>
 
-            {/* شدة التأثير */}
-            <div>
-              <label className="text-xs text-gray-600 block mb-2">
-                شدة التأثير: %{intensity}
-              </label>
-              <Slider
-                value={[intensity]}
-                onValueChange={(value) => setIntensity(value[0])}
-                max={100}
-                min={10}
-                step={10}
-                className="w-full"
-                data-testid="intensity-slider"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* الأدوات المساعدة */}
-      <Card className="border-pink-200">
-        <CardContent className="p-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">الأدوات المساعدة</h4>
-          <div className="flex justify-center gap-2">
-            {utilityTools.map((tool) => {
-              const Icon = tool.icon;
-              return (
-                <Button
-                  key={tool.id}
-                  variant="outline"
-                  size="sm"
-                  className="h-12 px-3 hover:bg-gray-50"
-                  data-testid={`utility-${tool.id}`}
-                >
-                  <Icon size={16} style={{ color: tool.color }} />
-                  <span className="mr-1 text-xs">{tool.name}</span>
-                </Button>
-              );
-            })}
+            {/* Apply button */}
+            <Button 
+              onClick={applyTool}
+              disabled={isApplying}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-3"
+            >
+              {isApplying ? (
+                <>
+                  <Sparkles className="ml-2 w-4 h-4 animate-spin" />
+                  جاري التطبيق...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="ml-2 w-4 h-4" />
+                  تطبيق الأداة
+                </>
+              )}
+            </Button>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* أزرار التحكم */}
-      <div className="flex justify-center gap-3">
-        <Button
-          onClick={handleApplyMakeup}
-          disabled={!selectedTool || isProcessing || !makeupTools.find(t => t.id === selectedTool)?.makeupType}
-          className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
-          data-testid="apply-makeup-btn"
-        >
-          {isProcessing ? (
-            <>
-              <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-              جاري التطبيق...
-            </>
-          ) : (
-            <>
-              <Paintbrush className="ml-2" size={16} />
-              تطبيق المكياج
-            </>
-          )}
-        </Button>
-        
-        <Button variant="outline" size="sm" data-testid="download-btn">
-          <Download className="ml-2" size={16} />
-          تحميل
-        </Button>
-        
-        <Button variant="outline" size="sm" data-testid="share-btn">
-          <Share2 className="ml-2" size={16} />
-          مشاركة
-        </Button>
-      </div>
+          {/* Image preview with tools */}
+          <div className="space-y-4">
+            <div className="relative bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl overflow-hidden">
+              <img 
+                src={image} 
+                alt="معاينة المكياج" 
+                className="w-full max-w-md mx-auto block"
+              />
+              
+              {/* Tool overlay indicator */}
+              <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                {tools.find(t => t.id === selectedTool)?.name}
+              </div>
+              
+              {/* Color indicator */}
+              <div className="absolute bottom-4 left-4 flex items-center space-x-2 gap-2">
+                <div 
+                  className="w-8 h-8 rounded-full border-2 border-white shadow-lg"
+                  style={{ backgroundColor: selectedColor }}
+                />
+                <div className="bg-black/70 text-white px-2 py-1 rounded text-xs">
+                  اللون المختار
+                </div>
+              </div>
+            </div>
 
-      {/* معلومات الأداة المحددة */}
-      {selectedTool && (
-        <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-          <p className="text-sm text-purple-800">
-            أداة محددة: <strong>{makeupTools.find(t => t.id === selectedTool)?.name}</strong>
-          </p>
-          <p className="text-xs text-gray-600 mt-1">
-            اللون: {selectedColor} | الحجم: {brushSize}px | الشدة: %{intensity}
-          </p>
+            {/* Quick tips */}
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-semibold text-blue-800 mb-2">نصائح سريعة:</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• استخدم الفرشاة الناعمة للتطبيق الطبيعي</li>
+                <li>• اختر الألوان المناسبة لدرجة بشرتك</li>
+                <li>• ابدأ بشدة منخفضة ثم زد تدريجياً</li>
+                <li>• استخدم أداة المزج لتوزيع الألوان</li>
+              </ul>
+            </div>
+          </div>
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
