@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import InteractiveMakeupTools from '@/components/interactive-makeup-tools';
 
 interface ProcessingStep {
   id: string;
@@ -554,6 +555,26 @@ export function ProfessionalFaceAppStudio() {
                   </div>
                 </div>
               </div>
+
+              {/* Interactive Makeup Tools - Under Image */}
+              {selectedImage && (
+                <div className="mt-6">
+                  <InteractiveMakeupTools
+                    onToolSelect={(tool, config) => {
+                      console.log('أداة محددة:', tool, config);
+                      toast({
+                        title: "تم اختيار الأداة",
+                        description: `تم اختيار أداة ${tool}`,
+                      });
+                    }}
+                    onApplyMakeup={async (config) => {
+                      console.log('تطبيق المكياج:', config);
+                      await processImage('makeup', config, config.intensity);
+                    }}
+                    isProcessing={isProcessing}
+                  />
+                </div>
+              )}
 
               {/* Effects Panel */}
               {selectedImage && (
