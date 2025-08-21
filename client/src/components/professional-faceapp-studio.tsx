@@ -113,6 +113,7 @@ export function ProfessionalFaceAppStudio() {
   const [selectedColor, setSelectedColor] = useState('#FF1744');
   const [matchIntensity, setMatchIntensity] = useState([70]);
   const [blendMode, setBlendMode] = useState('multiply');
+  const [isDragActive, setIsDragActive] = useState(false);
 
   const processImage = useCallback(async (category: string, effect: any, intensity: number) => {
     if (!selectedImage) return;
@@ -179,12 +180,93 @@ export function ProfessionalFaceAppStudio() {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      console.log('Selected file:', file);
+      
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "نوع ملف غير مدعوم",
+          description: "يرجى اختيار صورة بصيغة JPG, PNG أو GIF",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "حجم الملف كبير جداً",
+          description: "يرجى اختيار صورة أقل من 10 ميجابايت",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
-        setSelectedImage(e.target?.result as string);
-        setProcessedImage(null);
+        const result = e.target?.result as string;
+        if (result) {
+          setSelectedImage(result);
+          setProcessedImage(null);
+          toast({
+            title: "تم رفع الصورة بنجاح! 📷",
+            description: "يمكنك الآن اختيار التأثير المطلوب",
+          });
+        }
+      };
+      reader.onerror = () => {
+        toast({
+          title: "خطأ في قراءة الملف",
+          description: "حدث خطأ أثناء قراءة الصورة. يرجى المحاولة مرة أخرى",
+          variant: "destructive",
+        });
       };
       reader.readAsDataURL(file);
+    }
+    
+    // Reset the input value to allow selecting the same file again
+    event.target.value = '';
+  };
+
+  // Drag and drop handlers
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+    
+    if (imageFile) {
+      // Simulate file input change event
+      const fakeEvent = {
+        target: { files: [imageFile], value: '' }
+      } as React.ChangeEvent<HTMLInputElement>;
+      handleImageUpload(fakeEvent);
+    } else {
+      toast({
+        title: "ملف غير صحيح",
+        description: "يرجى سحب وإفلات صورة فقط",
+        variant: "destructive",
+      });
     }
   };
 
@@ -243,7 +325,10 @@ export function ProfessionalFaceAppStudio() {
               {/* Image Upload */}
               <div className="space-y-2">
                 <Button
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => {
+                    console.log('Upload button clicked');
+                    fileInputRef.current?.click();
+                  }}
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                   data-testid="button-upload-image"
                 >
@@ -253,9 +338,10 @@ export function ProfessionalFaceAppStudio() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/jpg,image/png,image/gif"
                   onChange={handleImageUpload}
                   className="hidden"
+                  multiple={false}
                 />
               </div>
 
@@ -372,7 +458,17 @@ export function ProfessionalFaceAppStudio() {
                 {/* Original Image */}
                 <div className="space-y-2">
                   <h4 className="font-semibold">الصورة الأصلية</h4>
-                  <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 flex items-center justify-center">
+                  <div 
+                    className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed flex items-center justify-center transition-all duration-200 ${
+                      isDragActive 
+                        ? 'border-purple-500 bg-purple-50 border-solid' 
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                  >
                     {selectedImage ? (
                       <div className="relative">
                         <img 
@@ -387,12 +483,38 @@ export function ProfessionalFaceAppStudio() {
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center text-gray-500">
-                        <Camera className="w-12 h-12 mx-auto mb-2" />
-                        <p>ارفع صورة للبدء</p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          يدعم: JPG, PNG, GIF
-                        </p>
+                      <div className={`text-center transition-colors duration-200 ${
+                        isDragActive ? 'text-purple-600' : 'text-gray-500'
+                      }`}>
+                        {isDragActive ? (
+                          <>
+                            <Download className="w-12 h-12 mx-auto mb-2 animate-bounce" />
+                            <p className="font-semibold">اتركها هنا! 🎯</p>
+                            <p className="text-xs mt-1">
+                              سيتم رفع الصورة تلقائياً
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <Camera className="w-12 h-12 mx-auto mb-2" />
+                            <p>ارفع صورة للبدء</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              اسحب وأفلت أو انقر لاختيار
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              JPG, PNG, GIF (أقل من 10 ميجا)
+                            </p>
+                            <Button
+                              onClick={() => fileInputRef.current?.click()}
+                              variant="outline"
+                              size="sm"
+                              className="mt-3"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              اختر صورة
+                            </Button>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
