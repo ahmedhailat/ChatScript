@@ -256,11 +256,11 @@ export function ProfessionalFaceAppStudio() {
     const imageFile = files.find(file => file.type.startsWith('image/'));
     
     if (imageFile) {
-      // Simulate file input change event
-      const fakeEvent = {
+      // Create proper file input change event
+      const mockEvent = {
         target: { files: [imageFile], value: '' }
-      } as React.ChangeEvent<HTMLInputElement>;
-      handleImageUpload(fakeEvent);
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      handleImageUpload(mockEvent);
     } else {
       toast({
         title: "ملف غير صحيح",

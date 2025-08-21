@@ -52,7 +52,12 @@ export default function FaceAppPage() {
             </TabsContent>
             
             <TabsContent value="demo">
-              <DemoVideoMaker />
+              <DemoVideoMaker 
+                beforeImage="/uploads/demo-before.jpg"
+                afterImage="/uploads/demo-after.jpg"
+                effectName="تحسين الوجه"
+                effectDetails={{ category: "beauty", intensity: 75 }}
+              />
             </TabsContent>
           </Tabs>
         </div>
