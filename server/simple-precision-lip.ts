@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import path from "path";
+import { faceBoundaryDetector } from "./face-boundary-detector";
 
 export interface SimpleLipOptions {
   color: string;
@@ -19,8 +20,8 @@ export class SimplePrecisionLip {
       const metadata = await image.metadata();
       const { width = 800, height = 600 } = metadata;
       
-      // Create a more precise lip mask using estimated lip position
-      const lipMask = await this.createLipMask(width, height);
+      // Create a precise lip mask using face boundary detection
+      const lipMask = await faceBoundaryDetector.createPreciseLipMask(imagePath);
       
       // Create color overlay
       const r = parseInt(options.color.substr(1, 2), 16);
@@ -67,33 +68,37 @@ export class SimplePrecisionLip {
   }
   
   /**
-   * Create a lip-shaped mask using SVG
+   * Create a precise lip-shaped mask using realistic lip anatomy
    */
   private async createLipMask(width: number, height: number): Promise<Buffer> {
-    // Calculate approximate lip position (center-bottom third of face)
+    // More precise lip detection based on facial proportions
     const lipCenterX = width * 0.5;
-    const lipCenterY = height * 0.72; // Around mouth area
-    const lipWidth = width * 0.12; // Approximately 12% of face width
-    const lipHeight = height * 0.04; // Approximately 4% of face height
+    const lipCenterY = height * 0.75; // Slightly lower for better accuracy
+    const lipWidth = width * 0.08; // Smaller, more realistic lip width
+    const lipHeight = height * 0.025; // More precise lip height
     
-    // Create a more realistic lip shape using SVG path
+    // Create a very precise lip shape with multiple curves for natural look
+    const upperLipY = lipCenterY - lipHeight * 0.3;
+    const lowerLipY = lipCenterY + lipHeight * 0.7;
+    
     const lipSVG = `
       <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <filter id="soften" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="1"/>
+          <filter id="precision" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/>
           </filter>
         </defs>
         <!-- Black background -->
         <rect width="100%" height="100%" fill="black"/>
-        <!-- White lip shape mask -->
-        <path d="M ${lipCenterX - lipWidth} ${lipCenterY} 
-                 Q ${lipCenterX - lipWidth/2} ${lipCenterY - lipHeight/2} ${lipCenterX} ${lipCenterY - lipHeight/3}
-                 Q ${lipCenterX + lipWidth/2} ${lipCenterY - lipHeight/2} ${lipCenterX + lipWidth} ${lipCenterY}
-                 Q ${lipCenterX + lipWidth/2} ${lipCenterY + lipHeight/2} ${lipCenterX} ${lipCenterY + lipHeight/3}
-                 Q ${lipCenterX - lipWidth/2} ${lipCenterY + lipHeight/2} ${lipCenterX - lipWidth} ${lipCenterY} Z" 
+        <!-- Precise upper lip -->
+        <path d="M ${lipCenterX - lipWidth} ${lipCenterY}
+                 C ${lipCenterX - lipWidth * 0.7} ${upperLipY} ${lipCenterX - lipWidth * 0.3} ${upperLipY} ${lipCenterX - lipWidth * 0.1} ${upperLipY + lipHeight * 0.1}
+                 C ${lipCenterX - lipWidth * 0.05} ${upperLipY - lipHeight * 0.1} ${lipCenterX + lipWidth * 0.05} ${upperLipY - lipHeight * 0.1} ${lipCenterX + lipWidth * 0.1} ${upperLipY + lipHeight * 0.1}
+                 C ${lipCenterX + lipWidth * 0.3} ${upperLipY} ${lipCenterX + lipWidth * 0.7} ${upperLipY} ${lipCenterX + lipWidth} ${lipCenterY}
+                 C ${lipCenterX + lipWidth * 0.8} ${lowerLipY} ${lipCenterX + lipWidth * 0.4} ${lowerLipY + lipHeight * 0.2} ${lipCenterX} ${lowerLipY}
+                 C ${lipCenterX - lipWidth * 0.4} ${lowerLipY + lipHeight * 0.2} ${lipCenterX - lipWidth * 0.8} ${lowerLipY} ${lipCenterX - lipWidth} ${lipCenterY} Z" 
               fill="white" 
-              filter="url(#soften)"/>
+              filter="url(#precision)"/>
       </svg>
     `;
     

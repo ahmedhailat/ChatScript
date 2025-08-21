@@ -1,5 +1,5 @@
 import { ProfessionalFaceAppStudio } from "@/components/professional-faceapp-studio";
-import EnhancedPrecisionMakeup from "@/components/enhanced-precision-makeup";
+import PrecisionLipDemo from "@/components/precision-lip-demo";
 import DemoVideoMaker from "@/components/demo-video-maker";
 import { ArrowLeft, Wand2, Video, Target } from "lucide-react";
 import { Link } from "wouter";
@@ -53,7 +53,7 @@ export default function FaceAppPage() {
             </TabsList>
             
             <TabsContent value="precision">
-              <EnhancedPrecisionMakeup 
+              <PrecisionLipDemo 
                 initialImage="/attached_assets/WhatsApp Image 2025-08-21 at 11.13.13_23f16f2f_1755764012623.jpg"
               />
             </TabsContent>
