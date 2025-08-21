@@ -158,11 +158,11 @@ export default function AIVisualization({
     });
   };
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6 space-y-6">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-slate-900 flex items-center">
-          <Bot className="text-ai-purple mr-3 w-5 h-5" />
-          AI Visualization Results
+          <Bot className="text-ai-purple ml-3 w-5 h-5" />
+          نتائج التصور بالذكاء الاصطناعي
         </h3>
         
         <Button 
@@ -172,7 +172,7 @@ export default function AIVisualization({
           data-testid="button-generate-prediction"
         >
           {isProcessing ? (
-            <Loader2 className="mr-2 w-4 h-4 animate-spin" />
+            <Loader2 className="ml-2 w-4 h-4 animate-spin" />
           ) : (
             <Bot className="mr-2 w-4 h-4" />
           )}

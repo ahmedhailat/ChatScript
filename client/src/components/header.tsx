@@ -14,7 +14,7 @@ export default function Header() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900">MedVision AI</h1>
-              <p className="text-xs text-slate-500">Surgical Visualization Platform</p>
+              <p className="text-xs text-slate-500">منصة التصور الجراحي</p>
             </div>
           </div>
           
@@ -48,7 +48,7 @@ export default function Header() {
             <div className="flex items-center space-x-3">
               <User className="w-5 h-5 text-slate-400" />
               <span className="text-sm font-medium text-slate-700" data-testid="text-doctor-name">
-                Dr. Ahmed Al-Rashid
+                د. أحمد الراشد
               </span>
             </div>
           </div>

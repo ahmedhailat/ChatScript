@@ -22,24 +22,24 @@ export default function AIPreviewGenerator({
 
   const procedureDetails = {
     rhinoplasty: {
-      name: "Rhinoplasty",
-      description: "AI will analyze nose structure and generate realistic reshaping preview",
-      estimatedTime: "15-30 seconds"
+      name: "تجميل الأنف",
+      description: "سيحلل الذكاء الاصطناعي بنية الأنف وينتج معاينة واقعية لإعادة التشكيل",
+      estimatedTime: "15-30 ثانية"
     },
     dental: {
-      name: "Dental Restoration", 
-      description: "AI will straighten teeth, improve alignment and apply natural whitening",
-      estimatedTime: "15-25 seconds"
+      name: "طب الأسنان التجميلي", 
+      description: "سيقوم الذكاء الاصطناعي بتقويم الأسنان وتحسين المحاذاة وتطبيق التبييض الطبيعي",
+      estimatedTime: "15-25 ثانية"
     },
     facelift: {
-      name: "Facial Contouring",
-      description: "AI will enhance facial structure with natural lifting and contouring",
-      estimatedTime: "20-35 seconds"
+      name: "نحت الوجه",
+      description: "سيعزز الذكاء الاصطناعي بنية الوجه مع الشد والنحت الطبيعي",
+      estimatedTime: "20-35 ثانية"
     },
     scar_removal: {
-      name: "Scar Removal",
-      description: "AI will reduce scar visibility and improve skin texture",
-      estimatedTime: "10-20 seconds"
+      name: "إزالة الندبات",
+      description: "سيقلل الذكاء الاصطناعي من ظهور الندبات ويحسن ملمس الجلد",
+      estimatedTime: "10-20 ثانية"
     }
   };
 
@@ -48,8 +48,8 @@ export default function AIPreviewGenerator({
   const generateAIPreview = async () => {
     if (!beforeImage) {
       toast({
-        title: "No image provided",
-        description: "Please capture or upload a photo first",
+        title: "لا توجد صورة",
+        description: "يرجى التقاط أو رفع صورة أولاً",
         variant: "destructive"
       });
       return;
@@ -86,8 +86,8 @@ export default function AIPreviewGenerator({
       if (result.success && result.afterImageUrl) {
         onPreviewGenerated(result.afterImageUrl);
         toast({
-          title: "AI Preview Generated",
-          description: `${currentProcedure.name} visualization completed successfully`,
+          title: "تم إنتاج المعاينة بالذكاء الاصطناعي",
+          description: `تم إكمال تصور ${currentProcedure.name} بنجاح`,
         });
       } else {
         throw new Error(result.error || 'Failed to generate preview');
@@ -96,8 +96,8 @@ export default function AIPreviewGenerator({
     } catch (error) {
       console.error('Error generating AI preview:', error);
       toast({
-        title: "Preview Generation Failed",
-        description: "Unable to generate AI preview. Please try again or check your connection.",
+        title: "فشل في إنتاج المعاينة",
+        description: "تعذر إنتاج المعاينة بالذكاء الاصطناعي. يرجى المحاولة مرة أخرى أو فحص الاتصال.",
         variant: "destructive"
       });
     } finally {
@@ -125,8 +125,8 @@ export default function AIPreviewGenerator({
       
       if (result.success) {
         toast({
-          title: "Image Analysis Complete",
-          description: `Suitable for ${procedureType}. ${result.analysis.recommendations || 'Ready for preview generation.'}`,
+          title: "اكتمل تحليل الصورة",
+          description: `مناسبة لـ ${procedureType}. ${result.analysis.recommendations || 'جاهز لإنتاج المعاينة.'}`,
         });
       }
     } catch (error) {
@@ -135,20 +135,20 @@ export default function AIPreviewGenerator({
   };
 
   return (
-    <div className="bg-gradient-to-br from-ai-purple/5 to-medical-blue/5 rounded-xl p-6 border border-ai-purple/20">
+    <div className="bg-gradient-to-br from-ai-purple/5 to-medical-blue/5 rounded-xl p-6 border border-ai-purple/20" dir="rtl">
       <div className="text-center mb-6">
         <div className="w-16 h-16 bg-ai-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
           <Sparkles className="w-8 h-8 text-ai-purple" />
         </div>
         
         <h3 className="text-xl font-bold text-slate-900 mb-2">
-          AI-Powered {currentProcedure.name}
+          {currentProcedure.name} بالذكاء الاصطناعي
         </h3>
         <p className="text-sm text-slate-600 mb-2">
           {currentProcedure.description}
         </p>
         <p className="text-xs text-slate-500">
-          Estimated time: {currentProcedure.estimatedTime}
+          الوقت المتوقع: {currentProcedure.estimatedTime}
         </p>
       </div>
 
@@ -156,7 +156,7 @@ export default function AIPreviewGenerator({
       {isGenerating && (
         <div className="mb-6">
           <div className="flex justify-between text-sm text-slate-600 mb-2">
-            <span>Generating Preview...</span>
+            <span>جاري إنتاج المعاينة...</span>
             <span>{progress}%</span>
           </div>
           <div className="w-full bg-slate-200 rounded-full h-2">
@@ -178,13 +178,13 @@ export default function AIPreviewGenerator({
         >
           {isGenerating ? (
             <>
-              <Loader2 className="mr-2 w-5 h-5 animate-spin" />
-              Generating AI Preview...
+              <Loader2 className="ml-2 w-5 h-5 animate-spin" />
+              جاري إنتاج المعاينة...
             </>
           ) : (
             <>
-              <Wand2 className="mr-2 w-5 h-5" />
-              Generate AI Preview
+              <Wand2 className="ml-2 w-5 h-5" />
+              إنتاج معاينة بالذكاء الاصطناعي
             </>
           )}
         </Button>
@@ -196,18 +196,18 @@ export default function AIPreviewGenerator({
           className="w-full border-ai-purple/30 text-ai-purple hover:bg-ai-purple/10"
           data-testid="button-analyze-image"
         >
-          <AlertCircle className="mr-2 w-4 h-4" />
-          Analyze Image First
+          <AlertCircle className="ml-2 w-4 h-4" />
+          تحليل الصورة أولاً
         </Button>
       </div>
 
       {/* AI Disclaimer */}
       <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-        <h5 className="font-medium text-amber-800 mb-1 text-sm">AI Preview Disclaimer</h5>
+        <h5 className="font-medium text-amber-800 mb-1 text-sm">إخلاء مسؤولية الذكاء الاصطناعي</h5>
         <p className="text-xs text-amber-700">
-          AI-generated previews are estimates for consultation purposes only. 
-          Actual surgical results may vary based on individual anatomy, healing, and other factors.
-          Always consult with qualified medical professionals.
+          المعاينات المولدة بالذكاء الاصطناعي هي تقديرات لأغراض الاستشارة فقط.
+          قد تختلف النتائج الجراحية الفعلية بناءً على التشريح الفردي والشفاء وعوامل أخرى.
+          استشر دائماً المهنيين الطبيين المؤهلين.
         </p>
       </div>
     </div>

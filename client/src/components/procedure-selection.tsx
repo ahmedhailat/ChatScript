@@ -12,34 +12,34 @@ export default function ProcedureSelection({ selectedProcedure, onProcedureChang
     {
       id: "rhinoplasty",
       icon: <Zap className="w-5 h-5 text-slate-400" />,
-      title: "Rhinoplasty",
-      description: "Nose reshaping surgery"
+      title: "تجميل الأنف",
+      description: "جراحة إعادة تشكيل الأنف"
     },
     {
       id: "dental",
       icon: <Smile className="w-5 h-5 text-slate-400" />,
-      title: "Dental Restoration",
-      description: "Teeth alignment & whitening"
+      title: "طب الأسنان التجميلي",
+      description: "تقويم وتبييض الأسنان"
     },
     {
       id: "facelift",
       icon: <User className="w-5 h-5 text-slate-400" />,
-      title: "Facial Contouring",
-      description: "Face lifting & contouring"
+      title: "نحت الوجه",
+      description: "شد ونحت الوجه"
     },
     {
       id: "scar_removal",
       icon: <Sparkles className="w-5 h-5 text-slate-400" />,
-      title: "Scar Removal",
-      description: "Scar reduction & skin treatment"
+      title: "إزالة الندبات",
+      description: "تقليل الندبات وعلاج الجلد"
     }
   ];
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6" dir="rtl">
       <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
-        <Zap className="text-medical-blue mr-3 w-5 h-5" />
-        Procedure Type
+        <Zap className="text-medical-blue ml-3 w-5 h-5" />
+        نوع العملية
       </h3>
       
       <RadioGroup 
