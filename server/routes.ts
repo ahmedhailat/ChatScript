@@ -17,7 +17,7 @@ import { VirtualRhinoplastyProcessor } from "./virtual-rhinoplasty-processor";
 import { opencvProcessor } from "./opencv-face-processor";
 import { registerConsultationRoutes } from "./consultation-routes";
 import { seedDoctors } from "./seed-doctors";
-import { simplePrecisionLip } from "./simple-precision-lip";
+import { ultraPrecisionLip } from "./ultra-precision-lip";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
 const noseBeautificationProcessor = new NoseBeautificationProcessor();
@@ -437,7 +437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (region === 'lips') {
         // Use simple precision lip processor for accurate lip application
         try {
-          const processedImageUrl = await simplePrecisionLip.applyPreciseLipstick(
+          const processedImageUrl = await ultraPrecisionLip.applyUltraPreciseLipstick(
             req.file.path,
             {
               color,
