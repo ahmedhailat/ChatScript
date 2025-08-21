@@ -432,6 +432,137 @@ export class MakeupProcessor {
       })
       .sharpen({ sigma: 1 + (intensity * 0.5) }); // Sharper details
   }
+
+  async applyAreaSpecificMakeup(imagePath: string, areas: any[], intensity: number): Promise<string> {
+    try {
+      console.log(`Processing area-specific makeup for ${areas.length} areas`);
+      
+      const outputPath = `uploads/area-makeup-${Date.now()}.jpg`;
+      
+      // Load the image
+      let image = sharp(imagePath);
+      
+      // Get image metadata
+      const metadata = await image.metadata();
+      console.log(`Image dimensions: ${metadata.width}x${metadata.height}`);
+      
+      // For each area, apply specific makeup
+      for (const area of areas) {
+        console.log(`Processing area: ${area.type} with color ${area.color}`);
+        
+        // Create area-specific overlay based on type and coordinates
+        switch (area.type) {
+          case 'lips':
+            image = await this.applyLipMakeup(image, area, intensity);
+            break;
+          case 'eyes':
+            image = await this.applyEyeMakeup(image, area, intensity);
+            break;
+          case 'cheeks':
+            image = await this.applyCheekMakeup(image, area, intensity);
+            break;
+          case 'eyebrows':
+            image = await this.applyEyebrowMakeup(image, area, intensity);
+            break;
+        }
+      }
+      
+      // Save the processed image
+      await image
+        .jpeg({ quality: 95 })
+        .toFile(outputPath);
+        
+      console.log(`Area-specific makeup saved to: ${outputPath}`);
+      return outputPath;
+      
+    } catch (error) {
+      console.error('Area-specific makeup processing error:', error);
+      throw new Error('Failed to apply area-specific makeup');
+    }
+  }
+
+  private async applyLipMakeup(image: sharp.Sharp, area: any, intensity: number): Promise<sharp.Sharp> {
+    const { r, g, b } = this.hexToRgb(area.color);
+    
+    const overlay = Buffer.from(`
+      <svg width="${area.coordinates?.width || 100}" height="${area.coordinates?.height || 50}">
+        <ellipse cx="50%" cy="50%" rx="45%" ry="40%" 
+                 fill="rgba(${r},${g},${b},${intensity/100})" />
+      </svg>
+    `);
+    
+    return image.composite([{
+      input: overlay,
+      top: area.coordinates?.y || 0,
+      left: area.coordinates?.x || 0,
+      blend: 'multiply'
+    }]);
+  }
+
+  private async applyEyeMakeup(image: sharp.Sharp, area: any, intensity: number): Promise<sharp.Sharp> {
+    const { r, g, b } = this.hexToRgb(area.color);
+    
+    const overlay = Buffer.from(`
+      <svg width="${area.coordinates?.width || 80}" height="${area.coordinates?.height || 30}">
+        <rect width="100%" height="100%" 
+              fill="rgba(${r},${g},${b},${intensity/150})" 
+              rx="10" ry="5" />
+      </svg>
+    `);
+    
+    return image.composite([{
+      input: overlay,
+      top: area.coordinates?.y || 0,
+      left: area.coordinates?.x || 0,
+      blend: 'overlay'
+    }]);
+  }
+
+  private async applyCheekMakeup(image: sharp.Sharp, area: any, intensity: number): Promise<sharp.Sharp> {
+    const { r, g, b } = this.hexToRgb(area.color);
+    
+    const overlay = Buffer.from(`
+      <svg width="${area.coordinates?.width || 60}" height="${area.coordinates?.height || 60}">
+        <circle cx="50%" cy="50%" r="40%" 
+                fill="rgba(${r},${g},${b},${intensity/200})" />
+      </svg>
+    `);
+    
+    return image.composite([{
+      input: overlay,
+      top: area.coordinates?.y || 0,
+      left: area.coordinates?.x || 0,
+      blend: 'soft-light'
+    }]);
+  }
+
+  private async applyEyebrowMakeup(image: sharp.Sharp, area: any, intensity: number): Promise<sharp.Sharp> {
+    const { r, g, b } = this.hexToRgb(area.color);
+    
+    const overlay = Buffer.from(`
+      <svg width="${area.coordinates?.width || 70}" height="${area.coordinates?.height || 15}">
+        <rect width="100%" height="100%" 
+              fill="rgba(${r},${g},${b},${intensity/120})" 
+              rx="5" ry="2" />
+      </svg>
+    `);
+    
+    return image.composite([{
+      input: overlay,
+      top: area.coordinates?.y || 0,
+      left: area.coordinates?.x || 0,
+      blend: 'darken'
+    }]);
+  }
+
+  private hexToRgb(hex: string): { r: number; g: number; b: number } {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 255, g: 105, b: 157 };
+  }
 }
 
 export const makeupProcessor = new MakeupProcessor();

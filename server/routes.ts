@@ -351,6 +351,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Area-specific makeup endpoint
+  app.post("/api/apply-area-makeup", upload.single("image"), async (req, res) => {
+    console.log("🎨 Area makeup request received");
+    
+    try {
+      const { areas, intensity = 70 } = req.body;
+      
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file provided" });
+      }
+
+      if (!areas || areas.length === 0) {
+        return res.status(400).json({ error: "No makeup areas specified" });
+      }
+
+      console.log(`Applying makeup to ${areas.length} areas with ${intensity}% intensity`);
+
+      // Process each makeup area
+      const processedImageUrl = await makeupProcessor.applyAreaSpecificMakeup(
+        req.file.path,
+        JSON.parse(areas),
+        parseInt(intensity)
+      );
+
+      res.json({
+        success: true,
+        makeupImageUrl: `/${processedImageUrl}`,
+        originalImageUrl: `/uploads/${req.file.filename}`,
+        areasProcessed: JSON.parse(areas).length,
+        intensity: parseInt(intensity),
+        processingMethod: 'area-specific'
+      });
+
+    } catch (error) {
+      console.error('Area makeup application error:', error);
+      res.status(500).json({ 
+        error: 'Failed to apply area-specific makeup',
+        details: (error as Error).message 
+      });
+    }
+  });
+
   // Face effects endpoint (FaceApp-style)
   app.post("/api/apply-face-effect", upload.single("image"), async (req, res) => {
     console.log("🎭 Face effect request received");
