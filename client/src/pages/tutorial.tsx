@@ -1,7 +1,7 @@
 import { ArrowLeft, BookOpen } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { InteractiveTutorialVideo } from "@/components/interactive-tutorial-video";
+import { RealTutorialVideo } from "@/components/real-tutorial-video";
 
 export default function TutorialPage() {
   return (
@@ -28,7 +28,7 @@ export default function TutorialPage() {
         </div>
 
         {/* Interactive Tutorial Video Component */}
-        <InteractiveTutorialVideo />
+        <RealTutorialVideo />
       </div>
     </div>
   );

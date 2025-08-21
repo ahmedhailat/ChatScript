@@ -50,7 +50,7 @@ export default function Home() {
                 href="/tutorial"
                 className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold no-underline"
               >
-                📺 شاهد الفيديو التعليمي التفاعلي
+                🎬 شاهد الفيديو التعليمي الكامل
               </a>
               <a 
                 href="/faceapp"
