@@ -15,6 +15,8 @@ import { FaceEffectsProcessor } from "./face-effects-processor";
 import { NoseBeautificationProcessor } from "./nose-beautification-processor";
 import { VirtualRhinoplastyProcessor } from "./virtual-rhinoplasty-processor";
 import { opencvProcessor } from "./opencv-face-processor";
+import { registerConsultationRoutes } from "./consultation-routes";
+import { seedDoctors } from "./seed-doctors";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
 const noseBeautificationProcessor = new NoseBeautificationProcessor();
@@ -828,6 +830,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Register consultation booking routes
+  registerConsultationRoutes(app);
+
+  // Seed doctors data if needed (run only once)
+  setTimeout(() => {
+    seedDoctors().catch(console.error);
+  }, 1000);
 
   const httpServer = createServer(app);
   return httpServer;

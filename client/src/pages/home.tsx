@@ -9,6 +9,7 @@ import LiveMakeupOverlay from "@/components/live-makeup-overlay";
 import EnhancedMakeupStudio from "@/components/enhanced-makeup-studio";
 import InteractiveMakeupTool from "@/components/interactive-makeup-tool";
 import AreaMakeupTool from "@/components/area-makeup-tool";
+import ConsultationBooking from '@/components/consultation-booking';
 import ConsultationForm from "@/components/consultation-form";
 import SampleGallery from "@/components/sample-gallery";
 import Footer from "@/components/footer";
@@ -208,6 +209,16 @@ export default function Home() {
             />
             <ConsultationForm className="mt-6" />
           </div>
+        </div>
+
+        {/* Real-time Consultation Booking System */}
+        <div className="mb-12">
+          <ConsultationBooking 
+            consultationType="rhinoplasty"
+            onBookingComplete={(consultationId) => {
+              console.log('Consultation booked:', consultationId);
+            }}
+          />
         </div>
 
         <SampleGallery />

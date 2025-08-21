@@ -154,8 +154,8 @@ export class MakeupProcessor {
         
         image = image.composite([{
           input: makeupOverlay,
-          left: makeup.area.x,
-          top: makeup.area.y,
+          left: Math.round(makeup.area.x),
+          top: Math.round(makeup.area.y),
           blend: blendSettings.blendMode as any
         }]);
       }
