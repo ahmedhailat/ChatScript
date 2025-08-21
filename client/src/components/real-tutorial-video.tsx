@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize, Settings, RotateCcw, FastForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -141,7 +141,7 @@ export function RealTutorialVideo() {
   };
 
   // Simulate video progress with useEffect
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       if (isPlaying && currentTime < duration) {
         setCurrentTime(prev => prev + playbackRate);
