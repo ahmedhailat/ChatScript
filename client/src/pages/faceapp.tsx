@@ -1,4 +1,4 @@
-import { FaceAppStudio } from "@/components/faceapp-studio";
+import { ProfessionalFaceAppStudio } from "@/components/professional-faceapp-studio";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ export default function FaceAppPage() {
 
       {/* Main Content */}
       <div className="py-8">
-        <FaceAppStudio />
+        <ProfessionalFaceAppStudio />
       </div>
     </div>
   );
