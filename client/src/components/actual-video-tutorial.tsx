@@ -16,22 +16,22 @@ export function ActualVideoTutorial() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentChapter, setCurrentChapter] = useState(0);
 
-  // Video chapters
+  // Video chapters - updated for comprehensive FaceApp tutorial
   const chapters = [
-    { title: "مقدمة عن FaceApp Studio", startTime: 0, duration: 45 },
-    { title: "كيفية تسجيل الدخول", startTime: 45, duration: 60 },
-    { title: "رفع وتصوير الصور", startTime: 105, duration: 75 },
-    { title: "تأثيرات العمر (أصغر/أكبر)", startTime: 180, duration: 90 },
-    { title: "تحويل الجنس والملامح", startTime: 270, duration: 85 },
-    { title: "إضافة الابتسامة والتعبيرات", startTime: 355, duration: 70 },
-    { title: "المكياج الافتراضي", startTime: 425, duration: 95 },
-    { title: "تأثيرات الشعر والعيون", startTime: 520, duration: 80 },
-    { title: "تحسين الجمال والبشرة", startTime: 600, duration: 75 },
-    { title: "حفظ ومشاركة النتائج", startTime: 675, duration: 60 }
+    { title: "مقدمة ونظرة عامة على FaceApp", startTime: 0, duration: 30 },
+    { title: "رفع الصور وأساسيات الواجهة", startTime: 30, duration: 45 },
+    { title: "تأثيرات العمر - الشباب والشيخوخة", startTime: 75, duration: 60 },
+    { title: "تحويل الجنس بواقعية عالية", startTime: 135, duration: 55 },
+    { title: "إضافة الابتسامات والتعبيرات", startTime: 190, duration: 50 },
+    { title: "المكياج الافتراضي والألوان", startTime: 240, duration: 70 },
+    { title: "تأثيرات الشعر وتغيير الألوان", startTime: 310, duration: 65 },
+    { title: "تكبير العيون وتأثيرات الوجه", startTime: 375, duration: 60 },
+    { title: "نعومة البشرة والجمال الطبيعي", startTime: 435, duration: 55 },
+    { title: "حفظ النتائج والمشاركة الاحترافية", startTime: 490, duration: 50 }
   ];
 
-  // Video source (demo video)
-  const videoSrc = "/attached_assets/WhatsApp Video 2025-08-10 at 22.39.34_0ae55de1_1754854909628.mp4";
+  // Video source (your reference video)
+  const videoSrc = "/attached_assets/WhatsApp Video 2025-08-21 at 11.55.34_5cfd9223_1755766720369.mp4";
 
   useEffect(() => {
     const video = videoRef.current;
@@ -127,22 +127,22 @@ export function ActualVideoTutorial() {
   return (
     <div className="max-w-6xl mx-auto p-6" dir="rtl">
       <Card className="shadow-2xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-red-600 to-pink-600 text-white">
+        <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-3xl mb-2">
-                🎬 فيديو تعليمي شامل - FaceApp Studio
+                📱 شرح FaceApp Studio - النسخة العربية
               </CardTitle>
               <p className="text-lg opacity-90">
-                تعلم جميع ميزات تحرير الوجه خطوة بخطوة
+                دليل شامل لجميع التأثيرات والميزات المتقدمة
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="bg-white/20 text-white">
-                🔴 مباشر
+                📹 فيديو تفاعلي
               </Badge>
               <Badge variant="secondary" className="bg-white/20 text-white">
-                4K HD
+                عربي 100%
               </Badge>
             </div>
           </div>
@@ -283,33 +283,63 @@ export function ActualVideoTutorial() {
             </div>
           </div>
 
-          {/* Video Info */}
-          <div className="p-6 border-t">
-            <div className="grid md:grid-cols-3 gap-6">
-              <div>
-                <h5 className="font-bold text-lg mb-2">📱 عن التطبيق</h5>
-                <p className="text-sm text-gray-600">
-                  FaceApp Studio هو أول تطبيق عربي لتحرير الوجه بالذكاء الاصطناعي. 
-                  يتضمن جميع ميزات FaceApp الأصلي مع واجهة عربية كاملة.
-                </p>
+          {/* Video Description & Features */}
+          <div className="p-6 border-t bg-gradient-to-r from-blue-50 to-purple-50">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                🎭 تطبيق FaceApp Studio - النسخة العربية الكاملة
+              </h3>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                اكتشف قوة الذكاء الاصطناعي في تحرير الوجوه مع أول تطبيق عربي شامل يحتوي على جميع ميزات FaceApp الاحترافية
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-4 gap-4 mb-6">
+              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                <div className="text-2xl mb-2">👤</div>
+                <h4 className="font-semibold mb-1">تأثيرات العمر</h4>
+                <p className="text-xs text-gray-600">شاهد نفسك أصغر أو أكبر سناً</p>
               </div>
               
-              <div>
-                <h5 className="font-bold text-lg mb-2">⭐ الميزات الرئيسية</h5>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• تأثيرات العمر والجنس</li>
-                  <li>• مكياج افتراضي احترافي</li>
-                  <li>• تحسين الجمال والبشرة</li>
-                  <li>• حفظ ومشاركة بجودة عالية</li>
-                </ul>
+              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                <div className="text-2xl mb-2">⚡</div>
+                <h4 className="font-semibold mb-1">تحويل الجنس</h4>
+                <p className="text-xs text-gray-600">تحويل واقعي بين الذكر والأنثى</p>
               </div>
               
-              <div>
-                <h5 className="font-bold text-lg mb-2">🎯 الهدف من الفيديو</h5>
-                <p className="text-sm text-gray-600">
-                  هذا الفيديو يعلمك كيفية استخدام جميع ميزات التطبيق 
-                  للحصول على أفضل النتائج في تحرير صور الوجه.
-                </p>
+              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                <div className="text-2xl mb-2">💄</div>
+                <h4 className="font-semibold mb-1">مكياج افتراضي</h4>
+                <p className="text-xs text-gray-600">مكياج احترافي بألوان متنوعة</p>
+              </div>
+              
+              <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                <div className="text-2xl mb-2">✨</div>
+                <h4 className="font-semibold mb-1">تحسين الجمال</h4>
+                <p className="text-xs text-gray-600">نعومة وإشراق طبيعي للبشرة</p>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span>مجاني 100%</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span>عربي بالكامل</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    <span>ذكاء اصطناعي متقدم</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    <span>جودة عالية</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

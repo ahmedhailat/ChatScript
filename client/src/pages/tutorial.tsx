@@ -15,8 +15,8 @@ export default function TutorialPage() {
               <BookOpen className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">دليل استخدام MedVision AI</h1>
-              <p className="text-slate-600">فيديو تعليمي تفاعلي شامل لجميع ميزات المنصة</p>
+              <h1 className="text-2xl font-bold text-slate-900">شرح FaceApp Studio</h1>
+              <p className="text-slate-600">فيديو تعليمي شامل لجميع تأثيرات تحرير الوجه</p>
             </div>
           </div>
           
