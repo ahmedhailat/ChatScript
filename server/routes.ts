@@ -10,6 +10,9 @@ import { randomUUID } from "crypto";
 import { aiProcessor } from "./ai-processor";
 import { imageProcessor } from "./image-processor";
 import { makeupProcessor } from "./makeup-processor";
+import { FaceEffectsProcessor } from "./face-effects-processor";
+
+const faceEffectsProcessor = new FaceEffectsProcessor();
 
 // Configure multer for file uploads
 const upload = multer({
@@ -345,6 +348,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: 'Failed to analyze image',
         details: (error as Error).message 
       });
+    }
+  });
+
+  // Face effects endpoint (FaceApp-style)
+  app.post("/api/apply-face-effect", upload.single("image"), async (req, res) => {
+    console.log("🎭 Face effect request received");
+    
+    if (!req.file) {
+      return res.status(400).json({ error: "No image file provided" });
+    }
+
+    try {
+      const { effect, intensity, category } = req.body;
+      
+      console.log(`تطبيق تأثير: ${effect}, الشدة: ${intensity}%, الفئة: ${category}`);
+      
+      const processedImageUrl = await faceEffectsProcessor.applyFaceEffect(
+        req.file.path,
+        effect,
+        parseInt(intensity) || 50,
+        category
+      );
+
+      res.json({
+        success: true,
+        processedImageUrl,
+        effect,
+        intensity: parseInt(intensity),
+        category
+      });
+
+    } catch (error) {
+      console.error("Error in face effects processing:", error);
+      
+      // Fallback to demo image
+      try {
+        const demoImageUrl = await faceEffectsProcessor.generateDemoEffect(req.body.effect);
+        res.json({
+          success: true,
+          processedImageUrl: demoImageUrl,
+          effect: req.body.effect,
+          intensity: parseInt(req.body.intensity) || 50,
+          category: req.body.category,
+          demo: true
+        });
+      } catch (demoError) {
+        res.status(500).json({ 
+          error: "Failed to process face effect", 
+          details: error instanceof Error ? error.message : "Unknown error" 
+        });
+      }
     }
   });
 

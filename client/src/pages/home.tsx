@@ -52,6 +52,12 @@ export default function Home() {
               >
                 📺 شاهد الفيديو التعليمي التفاعلي
               </a>
+              <a 
+                href="/faceapp"
+                className="bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg font-bold no-underline"
+              >
+                🎭 FaceApp Studio
+              </a>
             </div>
             
             <div className="flex items-center gap-6 text-sm" dir="rtl">

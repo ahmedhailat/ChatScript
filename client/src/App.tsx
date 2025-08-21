@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import AIDemo from "@/pages/ai-demo";
 import NotFound from "@/pages/not-found";
 import TutorialPage from "@/pages/tutorial";
+import FaceAppPage from "@/pages/faceapp";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import SubscriptionPage from "@/pages/subscription";
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/demo" component={AIDemo} />
       <Route path="/tutorial" component={TutorialPage} />
+      <Route path="/faceapp" component={FaceAppPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/subscription" component={SubscriptionPage} />
