@@ -1,7 +1,9 @@
 import { ProfessionalFaceAppStudio } from "@/components/professional-faceapp-studio";
-import { ArrowLeft } from "lucide-react";
+import DemoVideoMaker from "@/components/demo-video-maker";
+import { ArrowLeft, Wand2, Video } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function FaceAppPage() {
   return (
@@ -15,8 +17,8 @@ export default function FaceAppPage() {
                 <span className="text-white font-bold text-xl">F</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">FaceApp Studio</h1>
-                <p className="text-sm text-gray-600">تحرير الوجه بالذكاء الاصطناعي</p>
+                <h1 className="text-xl font-bold text-gray-900">FaceApp Studio Professional</h1>
+                <p className="text-sm text-gray-600">تحرير الوجه بالذكاء الاصطناعي + عرض توضيحي</p>
               </div>
             </div>
             
@@ -30,9 +32,30 @@ export default function FaceAppPage() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content with Tabs */}
       <div className="py-8">
-        <ProfessionalFaceAppStudio />
+        <div className="max-w-7xl mx-auto px-4">
+          <Tabs defaultValue="studio" className="w-full" dir="rtl">
+            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-6">
+              <TabsTrigger value="studio" className="flex items-center gap-2">
+                <Wand2 className="w-4 h-4" />
+                الاستوديو المهني
+              </TabsTrigger>
+              <TabsTrigger value="demo" className="flex items-center gap-2">
+                <Video className="w-4 h-4" />
+                العرض التوضيحي
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="studio">
+              <ProfessionalFaceAppStudio />
+            </TabsContent>
+            
+            <TabsContent value="demo">
+              <DemoVideoMaker />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );

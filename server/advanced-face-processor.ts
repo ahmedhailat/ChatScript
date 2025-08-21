@@ -382,11 +382,11 @@ export class AdvancedFaceProcessor {
   }
 
   private async applyFoundation(image: sharp.Sharp, options: any): Promise<sharp.Sharp> {
-    // Apply foundation as a subtle overlay
+    // Apply foundation as a subtle overlay with proper blur range
     return image.modulate({
       brightness: 1.05,
       saturation: 1.1
-    }).blur(0.2);
+    }).blur(0.5);
   }
 
   private async applyBlush(image: sharp.Sharp, options: any): Promise<sharp.Sharp> {
