@@ -108,6 +108,11 @@ export default function Home() {
                 >
                   {showMakeupTool ? 'إخفاء' : 'إظهار'} أداة المكياج التفاعلية
                 </button>
+                <a href="/tutorial" className="no-underline">
+                  <button className="w-full px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
+                    📹 مشاهدة فيديو الشرح
+                  </button>
+                </a>
               </div>
             )}
           </div>

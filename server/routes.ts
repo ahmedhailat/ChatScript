@@ -350,6 +350,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Serve uploaded images
   app.use("/uploads", express.static("uploads"));
+  
+  // Serve attached assets (including tutorial video)
+  app.use("/attached_assets", express.static("attached_assets"));
 
   const httpServer = createServer(app);
   return httpServer;
