@@ -9,12 +9,15 @@ import LiveMakeupOverlay from "@/components/live-makeup-overlay";
 import EnhancedMakeupStudio from "@/components/enhanced-makeup-studio";
 import InteractiveMakeupTool from "@/components/interactive-makeup-tool";
 import AreaMakeupTool from "@/components/area-makeup-tool";
+import DirectMakeupVisualizer from "@/components/direct-makeup-visualizer";
+import CompleteMakeupStudio from "@/components/complete-makeup-studio";
 import ConsultationBooking from '@/components/consultation-booking';
 import ConsultationForm from "@/components/consultation-form";
 import SampleGallery from "@/components/sample-gallery";
 import Footer from "@/components/footer";
 import { SimpleAITest } from "@/components/simple-ai-test";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [selectedProcedure, setSelectedProcedure] = useState<string>("rhinoplasty");
@@ -24,6 +27,8 @@ export default function Home() {
   const [showAreaSelector, setShowAreaSelector] = useState(false);
   const [showMakeupTool, setShowMakeupTool] = useState(false);
   const [faceSelections, setFaceSelections] = useState<any>(null);
+  
+  const { toast } = useToast();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -99,13 +104,31 @@ export default function Home() {
           </div>
         )}
 
-        {/* Area-Based Makeup Tool (when enabled) */}
+        {/* Complete Visual Makeup Studio (when enabled) */}
         {showMakeupTool && beforeImage && (
           <div className="mb-8">
-            <AreaMakeupTool
-              image={beforeImage}
-              onMakeupApplied={setAfterImage}
-            />
+            <div className="bg-gradient-to-r from-pink-50 to-purple-50 p-6 rounded-2xl border-2 border-pink-200">
+              <div className="text-center mb-4">
+                <h2 className="text-2xl font-bold text-purple-800 mb-2">
+                  ✨ استوديو المكياج المرئي المباشر ✨
+                </h2>
+                <p className="text-purple-600">
+                  انقر على الصورة لرؤية التأثيرات المرئية فوراً - كما في تطبيقات FaceApp!
+                </p>
+              </div>
+              
+              <CompleteMakeupStudio
+                image={beforeImage}
+                onMakeupComplete={(result) => {
+                  setAfterImage(result);
+                  console.log('Professional makeup completed');
+                  toast({
+                    title: "🎉 إطلالة مثالية!",
+                    description: "تم تطبيق المكياج الاحترافي بنجاح مع تأثيرات مرئية",
+                  });
+                }}
+              />
+            </div>
           </div>
         )}
 
@@ -138,9 +161,9 @@ export default function Home() {
                 </button>
                 <button 
                   onClick={() => setShowMakeupTool(!showMakeupTool)}
-                  className="w-full px-4 py-2 bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200 transition-colors"
+                  className="w-full px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors font-bold"
                 >
-                  {showMakeupTool ? 'إخفاء' : 'إظهار'} أداة المكياج التفاعلية
+                  {showMakeupTool ? '🎭 إخفاء' : '✨ إظهار'} استوديو المكياج المرئي
                 </button>
                 <a href="/tutorial" className="no-underline">
                   <button className="w-full px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">

@@ -369,9 +369,9 @@ export default function AreaMakeupTool({
       <div className="mb-4">
         <label className="text-sm font-medium mb-2 block">لون المكياج:</label>
         <div className="grid grid-cols-6 gap-2">
-          {makeupColors.map(color => (
+          {makeupColors.map((color, index) => (
             <button
-              key={color}
+              key={`color-${index}-${color.replace('#', '')}`}
               onClick={() => setSelectedColor(color)}
               className={`w-8 h-8 rounded-full border-2 ${
                 selectedColor === color ? 'border-gray-800' : 'border-gray-300'
