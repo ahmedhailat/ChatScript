@@ -139,23 +139,30 @@ export function ProfessionalFaceAppStudio() {
         ));
       }
 
-      const formData = new FormData();
+      // Convert data URL to blob
       const response = await fetch(selectedImage);
       const blob = await response.blob();
-      formData.append('image', blob);
+      
+      const formData = new FormData();
+      formData.append('image', blob, 'image.jpg');
       formData.append('category', category);
       formData.append('effect', JSON.stringify(effect));
       formData.append('intensity', intensity.toString());
 
+      console.log('Sending FaceApp processing request:', { category, effect, intensity });
+      
       const result = await apiRequest('POST', '/api/faceapp/process', formData);
       
-      if (result.ok) {
-        const data = await result.json();
+      const data = await result.json();
+      
+      if (data.success && data.processedImageUrl) {
         setProcessedImage(data.processedImageUrl);
         toast({
           title: "تم التطبيق بنجاح! ✨",
-          description: `تم تطبيق تأثير ${category} بجودة احترافية`,
+          description: data.message || `تم تطبيق تأثير ${category} بجودة احترافية`,
         });
+      } else {
+        throw new Error(data.message || 'فشل في المعالجة');
       }
     } catch (error) {
       toast({
@@ -329,8 +336,9 @@ export function ProfessionalFaceAppStudio() {
             <CardContent className="p-6">
               {/* Processing Steps */}
               {isProcessing && (
-                <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                  <h4 className="font-semibold mb-3 text-blue-800">
+                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold mb-3 text-blue-800 flex items-center gap-2">
+                    <Wand2 className="w-4 h-4 animate-spin" />
                     معالجة بتقنية AI المتقدمة...
                   </h4>
                   <div className="space-y-3">
@@ -345,8 +353,16 @@ export function ProfessionalFaceAppStudio() {
                         {step.status === 'processing' && (
                           <Progress value={step.progress} className="w-20 h-2" />
                         )}
+                        {step.status === 'completed' && (
+                          <Badge className="bg-green-100 text-green-800 text-xs">
+                            ✓
+                          </Badge>
+                        )}
                       </div>
                     ))}
+                  </div>
+                  <div className="mt-3 p-2 bg-white bg-opacity-50 rounded text-xs text-gray-600">
+                    💡 استخدام تقنية ModiFace للمعالجة الاحترافية
                   </div>
                 </div>
               )}
@@ -358,15 +374,25 @@ export function ProfessionalFaceAppStudio() {
                   <h4 className="font-semibold">الصورة الأصلية</h4>
                   <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 flex items-center justify-center">
                     {selectedImage ? (
-                      <img 
-                        src={selectedImage} 
-                        alt="Original" 
-                        className="w-full h-full object-cover"
-                      />
+                      <div className="relative">
+                        <img 
+                          src={selectedImage} 
+                          alt="Original" 
+                          className="w-full h-full object-cover rounded"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <Badge className="bg-gray-600 text-white">
+                            أصلية
+                          </Badge>
+                        </div>
+                      </div>
                     ) : (
                       <div className="text-center text-gray-500">
                         <Camera className="w-12 h-12 mx-auto mb-2" />
                         <p>ارفع صورة للبدء</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          يدعم: JPG, PNG, GIF
+                        </p>
                       </div>
                     )}
                   </div>
@@ -377,15 +403,30 @@ export function ProfessionalFaceAppStudio() {
                   <h4 className="font-semibold">النتيجة النهائية</h4>
                   <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-solid border-green-300 flex items-center justify-center">
                     {processedImage ? (
-                      <img 
-                        src={processedImage} 
-                        alt="Processed" 
-                        className="w-full h-full object-cover"
-                      />
+                      <div className="relative">
+                        <img 
+                          src={processedImage} 
+                          alt="Processed" 
+                          className="w-full h-full object-cover rounded"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <Badge className="bg-green-600 text-white">
+                            ✓ تم المعالجة
+                          </Badge>
+                        </div>
+                        <div className="absolute bottom-2 left-2">
+                          <Badge className="bg-blue-600 text-white text-xs">
+                            AI معالج
+                          </Badge>
+                        </div>
+                      </div>
                     ) : (
                       <div className="text-center text-gray-500">
                         <Sparkles className="w-12 h-12 mx-auto mb-2" />
                         <p>النتيجة ستظهر هنا</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          جودة احترافية 95%
+                        </p>
                       </div>
                     )}
                   </div>

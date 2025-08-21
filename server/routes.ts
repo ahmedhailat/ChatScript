@@ -481,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       // Return the processed image URL
-      const processedImageUrl = `/uploads/${path.basename(processedImagePath)}`;
+      const processedImageUrl = `/${processedImagePath}`;
       
       res.json({
         success: true,

@@ -655,31 +655,51 @@ export class AdvancedFaceProcessor {
     } : { r: 255, g: 105, b: 157 };
   }
 
-  // Main processing method
+  // Main processing method with enhanced logging
   async processImage(imagePath: string, options: ProcessingOptions): Promise<string> {
     try {
-      console.log(`Processing image with category: ${options.category}`);
+      console.log(`🎯 Processing image with category: ${options.category}`);
+      console.log(`📋 Effect details:`, options.effect);
+      console.log(`⚡ Intensity: ${options.intensity}%`);
+      console.log(`🎨 Precision: ${options.precision || 'high'}`);
+      
+      let result: string;
       
       switch (options.category) {
         case 'makeup':
-          return await this.applyMakeup(imagePath, options.effect.type, options.effect);
+          console.log(`💄 Applying makeup: ${options.effect.type}`);
+          result = await this.applyMakeup(imagePath, options.effect.type, options.effect);
+          break;
         case 'age':
-          return await this.transformAge(imagePath, options.effect.type, options.effect.years);
+          console.log(`⏰ Age transformation: ${options.effect.type} by ${options.effect.years} years`);
+          result = await this.transformAge(imagePath, options.effect.type, options.effect.years);
+          break;
         case 'gender':
-          return await this.transformGender(imagePath, options.effect.type);
+          console.log(`🔄 Gender transformation to: ${options.effect.type}`);
+          result = await this.transformGender(imagePath, options.effect.type);
+          break;
         case 'beauty':
-          return await this.enhanceBeauty(imagePath, options.effect.type, options.effect);
+          console.log(`✨ Beauty enhancement: ${options.effect.type}`);
+          result = await this.enhanceBeauty(imagePath, options.effect.type, options.effect);
+          break;
         case 'hair':
-          return await this.transformHair(imagePath, options.effect.type, options.effect);
+          console.log(`💇 Hair transformation: ${options.effect.type}`);
+          result = await this.transformHair(imagePath, options.effect.type, options.effect);
+          break;
         case 'effects':
-          return await this.applySpecialEffects(imagePath, options.effect);
+          console.log(`🌟 Special effect: ${options.effect.type}`);
+          result = await this.applySpecialEffects(imagePath, options.effect);
+          break;
         default:
           throw new Error(`Unknown category: ${options.category}`);
       }
       
+      console.log(`✅ Processing completed successfully: ${result}`);
+      return result;
+      
     } catch (error) {
-      console.error('Image processing error:', error);
-      throw new Error('Failed to process image');
+      console.error('❌ Image processing error:', error);
+      throw new Error(`Failed to process image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
