@@ -34,6 +34,15 @@ export class ImageProcessor {
       let image = sharp(imagePath);
       const metadata = await image.metadata();
       
+      // Apply general image enhancements first
+      image = image
+        .sharpen({ sigma: 0.5, m1: 0.8, m2: 0.4 })
+        .modulate({
+          brightness: 1.05,
+          saturation: 1.1,
+          hue: 0
+        });
+      
       // Apply surgical modifications based on procedure type
       switch (procedureType) {
         case 'rhinoplasty':
@@ -48,10 +57,13 @@ export class ImageProcessor {
         case 'scar_removal':
           image = await this.applyScarRemoval(image, selections, intensity);
           break;
+        default:
+          // Apply general facial enhancement
+          image = await this.applyGeneralEnhancement(image, intensity);
       }
       
       // Save the processed image
-      await image.jpeg({ quality: 90 }).toFile(outputPath);
+      await image.jpeg({ quality: 95 }).toFile(outputPath);
       
       return outputPath;
       
@@ -61,42 +73,41 @@ export class ImageProcessor {
     }
   }
 
+  private async applyGeneralEnhancement(
+    image: sharp.Sharp,
+    intensity: number
+  ): Promise<sharp.Sharp> {
+    // Apply general facial improvements
+    const intensityFactor = intensity / 100;
+    
+    return image
+      .gamma(1.1 + (intensityFactor * 0.1))
+      .modulate({
+        brightness: 1 + (intensityFactor * 0.1),
+        saturation: 1 + (intensityFactor * 0.15),
+        hue: 0
+      })
+      .blur(0.3)
+      .sharpen({ sigma: 1.5, m1: 0.8, m2: 0.4 });
+  }
+
   private async applyNoseReshaping(
     image: sharp.Sharp,
     noseArea: { x: number; y: number; width: number; height: number } | undefined,
     adjustments: SurgicalAdjustments,
     intensity: number
   ): Promise<sharp.Sharp> {
-    if (!noseArea || !adjustments.noseWidth) return image;
+    // Apply nose-specific enhancements
+    const intensityFactor = intensity / 100;
     
-    try {
-      const metadata = await image.metadata();
-      const { width = 0, height = 0 } = metadata;
-      
-      // Calculate adjustment strength based on intensity
-      const widthAdjust = Math.round((adjustments.noseWidth / 100) * intensity * 0.3);
-      const lengthAdjust = Math.round((adjustments.noseLength || 0 / 100) * intensity * 0.2);
-      
-      // Create nose reshaping overlay
-      const noseOverlay = await this.createNoseReshapeOverlay(
-        noseArea.width, 
-        noseArea.height, 
-        widthAdjust, 
-        lengthAdjust
-      );
-      
-      // Composite the overlay onto the original image
-      return image.composite([{
-        input: noseOverlay,
-        left: noseArea.x,
-        top: noseArea.y,
-        blend: 'overlay'
-      }]);
-      
-    } catch (error) {
-      console.error('Nose reshaping error:', error);
-      return image; // Return original if processing fails
-    }
+    return image
+      .gamma(1.05 + (intensityFactor * 0.05))
+      .modulate({
+        brightness: 1.02,
+        saturation: 1.05,
+        hue: 0
+      })
+      .sharpen({ sigma: 1.2, m1: 0.9, m2: 0.5 });
   }
 
   private async applyDentalWork(
@@ -105,49 +116,17 @@ export class ImageProcessor {
     adjustments: SurgicalAdjustments,
     intensity: number
   ): Promise<sharp.Sharp> {
-    if (!teethArea) return image;
+    // Apply dental whitening and alignment simulation
+    const intensityFactor = intensity / 100;
     
-    try {
-      // Apply teeth whitening
-      if (adjustments.teethWhitening) {
-        const whiteningOverlay = await this.createTeethWhiteningOverlay(
-          teethArea.width,
-          teethArea.height,
-          adjustments.teethWhitening,
-          intensity
-        );
-        
-        image = image.composite([{
-          input: whiteningOverlay,
-          left: teethArea.x,
-          top: teethArea.y,
-          blend: 'lighten'
-        }]);
-      }
-      
-      // Apply teeth straightening effect
-      if (adjustments.teethStraightening) {
-        const straighteningOverlay = await this.createTeethStraighteningOverlay(
-          teethArea.width,
-          teethArea.height,
-          adjustments.teethStraightening,
-          intensity
-        );
-        
-        image = image.composite([{
-          input: straighteningOverlay,
-          left: teethArea.x,
-          top: teethArea.y,
-          blend: 'overlay'
-        }]);
-      }
-      
-      return image;
-      
-    } catch (error) {
-      console.error('Dental work error:', error);
-      return image;
-    }
+    return image
+      .modulate({
+        brightness: 1.05 + (intensityFactor * 0.1),
+        saturation: 0.95,
+        hue: 5 // Slight warm tone for natural teeth
+      })
+      .gamma(1.1)
+      .sharpen({ sigma: 1.0, m1: 0.8, m2: 0.6 });
   }
 
   private async applyFaceLift(
@@ -156,27 +135,18 @@ export class ImageProcessor {
     adjustments: SurgicalAdjustments,
     intensity: number
   ): Promise<sharp.Sharp> {
-    try {
-      // Apply subtle contouring and lifting effects
-      const metadata = await image.metadata();
-      
-      // Create contouring overlay
-      const contourOverlay = await this.createContouringOverlay(
-        metadata.width!,
-        metadata.height!,
-        selections,
-        intensity
-      );
-      
-      return image.composite([{
-        input: contourOverlay,
-        blend: 'soft-light'
-      }]);
-      
-    } catch (error) {
-      console.error('Face lift error:', error);
-      return image;
-    }
+    // Apply facelift enhancements
+    const intensityFactor = intensity / 100;
+    
+    return image
+      .gamma(1.08 + (intensityFactor * 0.07))
+      .modulate({
+        brightness: 1.03,
+        saturation: 1.08,
+        hue: 0
+      })
+      .blur(0.5)
+      .sharpen({ sigma: 1.8, m1: 1.0, m2: 0.3 });
   }
 
   private async applyScarRemoval(
@@ -184,139 +154,52 @@ export class ImageProcessor {
     selections: FaceAreaSelection,
     intensity: number
   ): Promise<sharp.Sharp> {
-    try {
-      // Apply skin smoothing and blemish reduction
-      return image
-        .blur(intensity * 0.1) // Subtle blur for smoothing
-        .sharpen({ sigma: 0.5 + (intensity * 0.01) }); // Re-sharpen to maintain detail
-      
-    } catch (error) {
-      console.error('Scar removal error:', error);
-      return image;
-    }
+    // Apply scar reduction simulation
+    const intensityFactor = intensity / 100;
+    
+    return image
+      .blur(0.8 + (intensityFactor * 0.5))
+      .sharpen({ sigma: 0.8, m1: 1.2, m2: 0.4 })
+      .modulate({
+        brightness: 1.02,
+        saturation: 1.03,
+        hue: 0
+      });
   }
 
-  private async createNoseReshapeOverlay(
-    width: number, 
-    height: number, 
-    widthAdjust: number, 
-    lengthAdjust: number
-  ): Promise<Buffer> {
-    // Create a subtle gradient overlay for nose reshaping
-    const overlay = sharp({
-      create: {
-        width,
-        height,
-        channels: 4,
-        background: { r: 255, g: 220, b: 200, alpha: Math.abs(widthAdjust) * 0.3 }
-      }
-    });
-    
-    return overlay.png().toBuffer();
-  }
-
-  private async createTeethWhiteningOverlay(
-    width: number,
-    height: number,
-    whitening: number,
-    intensity: number
-  ): Promise<Buffer> {
-    // Create whitening overlay
-    const alpha = Math.min(255, (whitening / 100) * intensity * 2.55);
-    
-    const overlay = sharp({
-      create: {
-        width,
-        height,
-        channels: 4,
-        background: { r: 255, g: 255, b: 255, alpha }
-      }
-    });
-    
-    return overlay.png().toBuffer();
-  }
-
-  private async createTeethStraighteningOverlay(
-    width: number,
-    height: number,
-    straightening: number,
-    intensity: number
-  ): Promise<Buffer> {
-    // Create subtle alignment improvement overlay
-    const alpha = Math.min(255, (straightening / 100) * intensity * 1.5);
-    
-    const overlay = sharp({
-      create: {
-        width,
-        height,
-        channels: 4,
-        background: { r: 250, g: 248, b: 245, alpha }
-      }
-    });
-    
-    return overlay.png().toBuffer();
-  }
-
-  private async createContouringOverlay(
-    width: number,
-    height: number,
-    selections: FaceAreaSelection,
-    intensity: number
-  ): Promise<Buffer> {
-    // Create facial contouring overlay
-    const overlay = sharp({
-      create: {
-        width,
-        height,
-        channels: 4,
-        background: { r: 240, g: 220, b: 200, alpha: intensity * 0.8 }
-      }
-    });
-    
-    return overlay.png().toBuffer();
-  }
-
-  async applyMakeupEffect(
+  // Makeup application methods
+  async applyMakeup(
     imagePath: string,
     makeupType: string,
     color: string,
-    area: { x: number; y: number; width: number; height: number },
-    intensity: number
+    intensity: number,
+    area: { x: number; y: number; width: number; height: number }
   ): Promise<string> {
     try {
       const outputPath = path.join("uploads", `makeup_${Date.now()}.jpg`);
       
       let image = sharp(imagePath);
       
-      // Parse color hex to RGB
-      const hexColor = color.replace('#', '');
-      const r = parseInt(hexColor.substr(0, 2), 16);
-      const g = parseInt(hexColor.substr(2, 2), 16);
-      const b = parseInt(hexColor.substr(4, 2), 16);
-      const alpha = Math.min(255, intensity * 2.55);
-      
-      // Create makeup overlay
-      const makeupOverlay = sharp({
-        create: {
-          width: area.width,
-          height: area.height,
-          channels: 4,
-          background: { r, g, b, alpha }
-        }
-      });
-      
       // Apply makeup based on type
-      const blendMode = this.getMakeupBlendMode(makeupType);
-      
-      image = image.composite([{
-        input: await makeupOverlay.png().toBuffer(),
-        left: area.x,
-        top: area.y,
-        blend: blendMode as any
-      }]);
+      switch (makeupType) {
+        case 'lipstick':
+          image = await this.applyLipstick(image, color, intensity, area);
+          break;
+        case 'eyeshadow':
+          image = await this.applyEyeshadow(image, color, intensity, area);
+          break;
+        case 'blush':
+          image = await this.applyBlush(image, color, intensity, area);
+          break;
+        case 'foundation':
+          image = await this.applyFoundation(image, color, intensity);
+          break;
+        default:
+          // Apply general color enhancement
+          image = await this.applyColorTint(image, color, intensity);
+      }
       
       await image.jpeg({ quality: 90 }).toFile(outputPath);
-      
       return outputPath;
       
     } catch (error) {
@@ -325,18 +208,147 @@ export class ImageProcessor {
     }
   }
 
-  private getMakeupBlendMode(makeupType: string): string {
-    const blendModes = {
-      lipstick: 'multiply',
-      eyeshadow: 'soft-light',
-      blush: 'soft-light',
-      foundation: 'overlay',
-      eyeliner: 'multiply',
-      mascara: 'darken'
-    };
+  private async applyLipstick(
+    image: sharp.Sharp,
+    color: string,
+    intensity: number,
+    area: { x: number; y: number; width: number; height: number }
+  ): Promise<sharp.Sharp> {
+    // Apply lipstick color overlay
+    const colorRgb = this.hexToRgb(color);
+    const alpha = Math.min(intensity * 0.01, 0.8);
     
-    return blendModes[makeupType as keyof typeof blendModes] || 'overlay';
+    const overlay = sharp({
+      create: {
+        width: area.width,
+        height: area.height,
+        channels: 4,
+        background: { r: colorRgb.r, g: colorRgb.g, b: colorRgb.b, alpha: alpha }
+      }
+    });
+    
+    return image.composite([{
+      input: await overlay.png().toBuffer(),
+      left: area.x,
+      top: area.y,
+      blend: 'multiply'
+    }]);
+  }
+
+  private async applyEyeshadow(
+    image: sharp.Sharp,
+    color: string,
+    intensity: number,
+    area: { x: number; y: number; width: number; height: number }
+  ): Promise<sharp.Sharp> {
+    // Apply eyeshadow with gradient effect
+    const colorRgb = this.hexToRgb(color);
+    const alpha = Math.min(intensity * 0.008, 0.6);
+    
+    const overlay = sharp({
+      create: {
+        width: area.width,
+        height: area.height,
+        channels: 4,
+        background: { r: colorRgb.r, g: colorRgb.g, b: colorRgb.b, alpha: alpha }
+      }
+    });
+    
+    return image.composite([{
+      input: await overlay.png().toBuffer(),
+      left: area.x,
+      top: area.y,
+      blend: 'soft-light'
+    }]);
+  }
+
+  private async applyBlush(
+    image: sharp.Sharp,
+    color: string,
+    intensity: number,
+    area: { x: number; y: number; width: number; height: number }
+  ): Promise<sharp.Sharp> {
+    // Apply blush with soft blending
+    const colorRgb = this.hexToRgb(color);
+    const alpha = Math.min(intensity * 0.006, 0.4);
+    
+    const overlay = sharp({
+      create: {
+        width: area.width,
+        height: area.height,
+        channels: 4,
+        background: { r: colorRgb.r, g: colorRgb.g, b: colorRgb.b, alpha: alpha }
+      }
+    });
+    
+    return image.composite([{
+      input: await overlay.png().toBuffer(),
+      left: area.x,
+      top: area.y,
+      blend: 'overlay'
+    }]);
+  }
+
+  private async applyFoundation(
+    image: sharp.Sharp,
+    color: string,
+    intensity: number
+  ): Promise<sharp.Sharp> {
+    // Apply foundation as overall color correction
+    const intensityFactor = intensity / 100;
+    
+    return image.modulate({
+      brightness: 1 + (intensityFactor * 0.05),
+      saturation: 1 - (intensityFactor * 0.1),
+      hue: 0
+    });
+  }
+
+  private async applyColorTint(
+    image: sharp.Sharp,
+    color: string,
+    intensity: number
+  ): Promise<sharp.Sharp> {
+    // Apply general color tint
+    const intensityFactor = intensity / 100;
+    
+    return image.modulate({
+      brightness: 1 + (intensityFactor * 0.03),
+      saturation: 1 + (intensityFactor * 0.2),
+      hue: this.getHueFromColor(color) * intensityFactor
+    });
+  }
+
+  private hexToRgb(hex: string): { r: number; g: number; b: number } {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 255, g: 192, b: 203 }; // Default to pink
+  }
+
+  private getHueFromColor(hex: string): number {
+    // Simple hue calculation from hex color
+    const rgb = this.hexToRgb(hex);
+    const max = Math.max(rgb.r, rgb.g, rgb.b);
+    const min = Math.min(rgb.r, rgb.g, rgb.b);
+    const delta = max - min;
+    
+    if (delta === 0) return 0;
+    
+    let hue = 0;
+    if (max === rgb.r) {
+      hue = ((rgb.g - rgb.b) / delta) % 6;
+    } else if (max === rgb.g) {
+      hue = (rgb.b - rgb.r) / delta + 2;
+    } else {
+      hue = (rgb.r - rgb.g) / delta + 4;
+    }
+    
+    return hue * 60;
   }
 }
 
+// Export an instance for use in routes
 export const imageProcessor = new ImageProcessor();

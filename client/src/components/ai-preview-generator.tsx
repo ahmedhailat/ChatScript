@@ -85,10 +85,19 @@ export default function AIPreviewGenerator({
       
       if (result.success && result.afterImageUrl) {
         onPreviewGenerated(result.afterImageUrl);
-        toast({
-          title: "تم إنتاج المعاينة بالذكاء الاصطناعي",
-          description: `تم إكمال تصور ${currentProcedure.name} بنجاح`,
-        });
+        
+        // Show different messages based on processing method
+        if (result.processingMethod === 'ai') {
+          toast({
+            title: "تم إنتاج المعاينة بالذكاء الاصطناعي",
+            description: `تم إكمال تصور ${currentProcedure.name} باستخدام الذكاء الاصطناعي المتقدم`,
+          });
+        } else {
+          toast({
+            title: "تم إنتاج المعاينة بالمعالجة المحلية",
+            description: `تم إكمال تصور ${currentProcedure.name} باستخدام المعالجة المحلية المتقدمة (خدمة الذكاء الاصطناعي غير متاحة حالياً)`,
+          });
+        }
       } else {
         throw new Error(result.error || 'Failed to generate preview');
       }
@@ -97,7 +106,7 @@ export default function AIPreviewGenerator({
       console.error('Error generating AI preview:', error);
       toast({
         title: "فشل في إنتاج المعاينة",
-        description: "تعذر إنتاج المعاينة بالذكاء الاصطناعي. يرجى المحاولة مرة أخرى أو فحص الاتصال.",
+        description: "حدث خطأ في إنتاج المعاينة. قد تكون خدمة الذكاء الاصطناعي مؤقتاً غير متاحة. يرجى المحاولة مرة أخرى.",
         variant: "destructive"
       });
     } finally {
@@ -142,7 +151,7 @@ export default function AIPreviewGenerator({
         </div>
         
         <h3 className="text-xl font-bold text-slate-900 mb-2">
-          {currentProcedure.name} بالذكاء الاصطناعي
+          توليد {currentProcedure.name} بالذكاء الاصطناعي
         </h3>
         <p className="text-sm text-slate-600 mb-2">
           {currentProcedure.description}

@@ -242,148 +242,74 @@ export default function AIVisualization({
       {/* Advanced Features Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
         <div className="overflow-x-auto">
-          <TabsList className="inline-flex w-max min-w-full">
-            <TabsTrigger value="results" data-testid="tab-results">
-              <Bot className="mr-2 w-4 h-4" />
-              AI Results
+          <TabsList className="inline-flex w-max min-w-full gap-2">
+            <TabsTrigger value="results" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              النتائج
             </TabsTrigger>
-            <TabsTrigger value="makeup" data-testid="tab-makeup">
-              <Palette className="mr-2 w-4 h-4" />
-              Virtual Makeup
+            <TabsTrigger value="makeup" className="flex items-center gap-2">
+              <Palette className="w-4 h-4" />
+              المكياج الافتراضي
             </TabsTrigger>
-            <TabsTrigger value="filters" data-testid="tab-filters">
-              <Filter className="mr-2 w-4 h-4" />
-              Filters
+            <TabsTrigger value="adjustments" className="flex items-center gap-2">
+              <Sliders className="w-4 h-4" />
+              التعديلات الجراحية
             </TabsTrigger>
-            <TabsTrigger value="adjustments" data-testid="tab-adjustments">
-              <Sliders className="mr-2 w-4 h-4" />
-              Face Adjust
+            <TabsTrigger value="filters" className="flex items-center gap-2">
+              <Filter className="w-4 h-4" />
+              الفلاتر المباشرة
             </TabsTrigger>
-            <TabsTrigger value="medical" data-testid="tab-medical">
-              <Sparkles className="mr-2 w-4 h-4" />
-              Medical Effects
+            <TabsTrigger value="medical" className="flex items-center gap-2">
+              <Layers className="w-4 h-4" />
+              التأثيرات الطبية
             </TabsTrigger>
-            <TabsTrigger value="aging" data-testid="tab-aging">
-              <Clock className="mr-2 w-4 h-4" />
-              Age Progression
+            <TabsTrigger value="age" className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              تطور العمر
             </TabsTrigger>
           </TabsList>
         </div>
 
-        <TabsContent value="results" className="mt-4">
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <h5 className="font-medium text-slate-900 mb-3">Analysis Tools</h5>
-            <div className="flex flex-wrap gap-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                disabled={!beforeImage}
-                data-testid="button-crop"
-              >
-                <Crop className="mr-2 w-4 h-4" />
-                Crop
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                disabled={!beforeImage}
-                data-testid="button-rotate"
-              >
-                <RotateCw className="mr-2 w-4 h-4" />
-                Rotate
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                disabled={!beforeImage}
-                data-testid="button-enhance"
-              >
-                <Palette className="mr-2 w-4 h-4" />
-                Enhance
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                disabled={!afterImage}
-                data-testid="button-export"
-              >
-                <Download className="mr-2 w-4 h-4" />
-                Export
-              </Button>
-            </div>
-
-            {/* Effect Layers Display */}
-            {effectLayers.length > 0 && (
-              <div className="mt-4">
-                <h6 className="font-medium text-slate-700 mb-2 flex items-center">
-                  <Layers className="mr-2 w-4 h-4" />
-                  Active Effects ({effectLayers.length})
-                </h6>
-                <div className="space-y-2">
-                  {effectLayers.map((layer, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-2 bg-white rounded border text-sm"
-                    >
-                      <span className="font-medium capitalize">
-                        {layer.type.replace('_', ' ')}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {layer.color && (
-                          <div 
-                            className="w-4 h-4 rounded border"
-                            style={{ backgroundColor: layer.color }}
-                          />
-                        )}
-                        <span className="text-slate-600">{layer.intensity}%</span>
-                        <button
-                          onClick={() => setEffectLayers(prev => 
-                            prev.map((l, i) => i === index ? { ...l, visible: !l.visible } : l)
-                          )}
-                          className={`w-3 h-3 rounded ${layer.visible ? 'bg-green-500' : 'bg-slate-300'}`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+        <TabsContent value="results" className="mt-6">
+          <div className="text-center p-8 border-2 border-dashed border-slate-200 rounded-lg">
+            <Bot className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+            <h4 className="text-lg font-medium text-slate-900 mb-2">نتائج التصور</h4>
+            <p className="text-slate-600">النتائج ستظهر هنا بعد معالجة الصورة</p>
           </div>
         </TabsContent>
 
-        <TabsContent value="makeup" className="mt-4">
-          <MakeupColors 
+        <TabsContent value="makeup" className="mt-6">
+          <MakeupColors
+            beforeImage={beforeImage}
             onColorChange={handleMakeupColorChange}
-            disabled={!beforeImage || isProcessing}
           />
         </TabsContent>
 
-        <TabsContent value="filters" className="mt-4">
-          <RealTimeFilters
-            onFilterChange={handleFilterChange}
-            disabled={!beforeImage || isProcessing}
-          />
-        </TabsContent>
-
-        <TabsContent value="adjustments" className="mt-4">
+        <TabsContent value="adjustments" className="mt-6">
           <FacialAdjustments
+            beforeImage={beforeImage}
             onAdjustmentChange={handleFacialAdjustments}
-            disabled={!beforeImage || isProcessing}
           />
         </TabsContent>
 
-        <TabsContent value="medical" className="mt-4">
+        <TabsContent value="filters" className="mt-6">
+          <RealTimeFilters
+            beforeImage={beforeImage}
+            onFilterChange={handleFilterChange}
+          />
+        </TabsContent>
+
+        <TabsContent value="medical" className="mt-6">
           <MedicalEffects
+            beforeImage={beforeImage}
             onEffectChange={handleMedicalEffectChange}
-            disabled={!beforeImage || isProcessing}
           />
         </TabsContent>
 
-        <TabsContent value="aging" className="mt-4">
+        <TabsContent value="age" className="mt-6">
           <AgeProgression
+            beforeImage={beforeImage}
             onAgeChange={handleAgeChange}
-            disabled={!beforeImage || isProcessing}
-            currentAge={25}
           />
         </TabsContent>
       </Tabs>
