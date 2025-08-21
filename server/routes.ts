@@ -231,11 +231,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Multiple makeup effects endpoint
+  // Area-based makeup effects endpoint
   app.post('/api/apply-multiple-makeup', upload.single('image'), async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ error: 'No image provided' });
+        return res.status(400).json({ error: 'لم يتم توفير صورة' });
       }
 
       const { effects } = req.body;
@@ -244,7 +244,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         makeupEffects = JSON.parse(effects);
       } catch (e) {
-        return res.status(400).json({ error: 'Invalid effects format' });
+        return res.status(400).json({ error: 'تنسيق تأثيرات غير صالح' });
+      }
+      
+      // Validate effects array
+      if (!Array.isArray(makeupEffects) || makeupEffects.length === 0) {
+        return res.status(400).json({ error: 'لا توجد تأثيرات مكياج محددة' });
       }
       
       const localResultPath = await makeupProcessor.applyMultipleMakeupEffects(
@@ -256,13 +261,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         makeupImageUrl: `/${localResultPath}`,
         originalImageUrl: `/uploads/${req.file.filename}`,
-        processingMethod: 'local'
+        processingMethod: 'local',
+        message: `تم تطبيق ${makeupEffects.length} تأثير مكياج بنجاح`
       });
 
     } catch (error) {
-      console.error('Multiple makeup application error:', error);
+      console.error('Area makeup application error:', error);
       res.status(500).json({ 
-        error: 'Failed to apply multiple makeup effects',
+        error: 'فشل في تطبيق تأثيرات المكياج على المناطق المحددة',
         details: (error as Error).message 
       });
     }

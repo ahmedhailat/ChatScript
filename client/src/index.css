@@ -3,6 +3,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Arabic RTL Support */
+html[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] * {
+  direction: rtl;
+}
+
+/* Font support for Arabic */
+body {
+  font-family: 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* RTL specific utilities */
+.rtl\:text-right {
+  text-align: right;
+}
+
+.rtl\:mr-2 {
+  margin-right: 0.5rem;
+}
+
+.rtl\:ml-2 {
+  margin-left: 0.5rem;
+}
+
 :root {
   --background: hsl(0 0% 100%);
   --foreground: hsl(210 25% 7.8431%);

@@ -16,11 +16,21 @@ export default function CameraCapture({ onImageCapture, beforeImage }: CameraCap
   const { toast } = useToast();
   const { videoRef, canvasRef, isStreaming, error, startCamera, stopCamera, capturePhoto } = useCamera();
 
+  // Auto-hide camera error after some time
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setShowCamera(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleFileUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast({
-        title: "Invalid file type",
-        description: "Please upload a valid image file (JPEG, PNG)",
+        title: "نوع ملف غير صحيح",
+        description: "يرجى رفع ملف صورة صالح (JPEG, PNG)",
         variant: "destructive",
       });
       return;
@@ -28,8 +38,8 @@ export default function CameraCapture({ onImageCapture, beforeImage }: CameraCap
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "File too large",
-        description: "Please upload an image smaller than 10MB",
+        title: "الملف كبير جداً",
+        description: "يرجى رفع صورة أصغر من 10 ميجابايت",
         variant: "destructive",
       });
       return;
@@ -40,8 +50,8 @@ export default function CameraCapture({ onImageCapture, beforeImage }: CameraCap
       if (e.target?.result) {
         onImageCapture(e.target.result as string);
         toast({
-          title: "Image uploaded successfully",
-          description: "Ready for AI analysis",
+          title: "تم رفع الصورة بنجاح",
+          description: "جاهزة للتحليل بالذكاء الاصطناعي",
         });
       }
     };

@@ -1,5 +1,6 @@
 import Header from "@/components/header";
 import CameraCapture from "@/components/camera-capture";
+import ArabicCameraCapture from "@/components/arabic-camera-capture";
 import ProcedureSelection from "@/components/procedure-selection";
 import AIVisualization from "@/components/ai-visualization";
 import AIPreviewGenerator from "@/components/ai-preview-generator";
@@ -28,26 +29,26 @@ export default function Home() {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
-        <div className="medical-gradient rounded-2xl p-8 mb-8 text-white">
+        <div className="medical-gradient rounded-2xl p-8 mb-8 text-white" dir="rtl">
           <div className="max-w-3xl">
-            <h2 className="text-3xl font-bold mb-4">AI-Powered Surgical Visualization</h2>
+            <h2 className="text-3xl font-bold mb-4">التصور الجراحي بالذكاء الاصطناعي</h2>
             <p className="text-blue-100 mb-6">
-              Advanced artificial intelligence technology to help visualize potential surgical outcomes. 
-              Secure, HIPAA-compliant, and designed for medical professionals.
+              تقنية الذكاء الاصطناعي المتقدمة لمساعدة المهنيين الطبيين على تصور نتائج العمليات الجراحية المحتملة.
+              آمن ومتوافق مع معايير HIPAA ومصمم للمهنيين الطبيين.
             </p>
             
             <div className="flex items-center space-x-4 text-sm">
               <div className="flex items-center space-x-2">
                 <i className="fas fa-shield-alt"></i>
-                <span>HIPAA Compliant</span>
+                <span>متوافق مع HIPAA</span>
               </div>
               <div className="flex items-center space-x-2">
                 <i className="fas fa-lock"></i>
-                <span>End-to-End Encrypted</span>
+                <span>مشفر بالكامل</span>
               </div>
               <div className="flex items-center space-x-2">
                 <i className="fas fa-certificate"></i>
-                <span>Medical Grade AI</span>
+                <span>ذكاء اصطناعي طبي</span>
               </div>
             </div>
           </div>
@@ -75,10 +76,10 @@ export default function Home() {
         )}
 
         {/* Main Workflow Grid */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8" dir="rtl">
           {/* Left Column */}
           <div className="lg:col-span-1 space-y-6">
-            <CameraCapture 
+            <ArabicCameraCapture 
               onImageCapture={setBeforeImage}
               beforeImage={beforeImage}
             />
@@ -99,7 +100,7 @@ export default function Home() {
                   onClick={() => setShowAreaSelector(!showAreaSelector)}
                   className="w-full px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
                 >
-                  {showAreaSelector ? 'Hide' : 'Show'} Precise Area Selection
+                  {showAreaSelector ? 'إخفاء' : 'إظهار'} تحديد المناطق بدقة
                 </button>
                 <button 
                   onClick={() => setShowMakeupTool(!showMakeupTool)}

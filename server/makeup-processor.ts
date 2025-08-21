@@ -64,6 +64,74 @@ export class MakeupProcessor {
     }
   }
 
+  // Area-specific makeup overlay creation
+  async createAreaMakeupOverlay(
+    width: number,
+    height: number,
+    makeupType: string,
+    color: string,
+    intensity: number,
+    area: { x: number; y: number; width: number; height: number }
+  ): Promise<Buffer> {
+    try {
+      // Parse hex color
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+      const alpha = Math.round((intensity / 100) * 255);
+      
+      // Create base overlay
+      const overlay = sharp({
+        create: {
+          width: area.width,
+          height: area.height,
+          channels: 4,
+          background: { r, g, b, alpha }
+        }
+      });
+      
+      // Apply makeup-specific effects
+      let processed = overlay;
+      
+      switch (makeupType) {
+        case 'lipstick':
+          // Softer blend for lips
+          processed = processed.modulate({ 
+            saturation: 1.3, 
+            brightness: 0.9 
+          });
+          break;
+        case 'eyeshadow':
+          // Darker, more dramatic for eyes
+          processed = processed.modulate({ 
+            saturation: 1.1, 
+            brightness: 0.7 
+          });
+          break;
+        case 'blush':
+          // Lighter, more natural for cheeks
+          processed = processed.modulate({ 
+            saturation: 0.8, 
+            brightness: 1.1 
+          });
+          break;
+        case 'foundation':
+          // Even, neutral coverage
+          processed = processed.modulate({ 
+            saturation: 0.6, 
+            brightness: 1.0 
+          });
+          break;
+      }
+      
+      return await processed.png().toBuffer();
+    } catch (error) {
+      console.error('Error creating area makeup overlay:', error);
+      throw error;
+    }
+  }
+
   async applyMultipleMakeupEffects(
     imagePath: string, 
     makeupEffects: MakeupOptions[]
