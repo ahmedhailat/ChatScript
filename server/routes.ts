@@ -17,7 +17,7 @@ import { VirtualRhinoplastyProcessor } from "./virtual-rhinoplasty-processor";
 import { opencvProcessor } from "./opencv-face-processor";
 import { registerConsultationRoutes } from "./consultation-routes";
 import { seedDoctors } from "./seed-doctors";
-import { professionalLipSegmentation } from "./professional-lip-segmentation";
+import { realtimeLipProcessor } from "./realtime-lip-processor";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
 const noseBeautificationProcessor = new NoseBeautificationProcessor();
@@ -435,15 +435,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Applying precision ${region} makeup with color ${color}, intensity ${intensity}%, texture ${texture}`);
 
       if (region === 'lips') {
-        // Use professional lip segmentation for industry-grade precision
+        // Use real-time lip processing like mobile makeup apps
         try {
-          const processedImageUrl = await professionalLipSegmentation.applyProfessionalLipstick(
+          const processedImageUrl = await realtimeLipProcessor.applyRealtimeLipstick(
             req.file.path,
             {
               color,
               intensity: parseInt(intensity),
-              texture: (texture as any) || 'satin',
-              naturalBlending: true
+              texture: (texture as any) || 'satin'
             }
           );
 

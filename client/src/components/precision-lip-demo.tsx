@@ -99,8 +99,8 @@ export default function PrecisionLipDemo({ initialImage }: PrecisionLipDemoProps
         setProcessedImage(makeupResult.processedImageUrl);
         
         toast({
-          title: "✅ تم التطبيق المحترف بنجاح",
-          description: "تقنية ModiFace طبقت أحمر الشفاه داخل الحدود تماماً",
+          title: "✅ تم التطبيق الفوري بنجاح",
+          description: "تقنية YouCam طبقت المكياج بدقة الهاتف المحمول",
         });
       } else {
         throw new Error(makeupResult.error || 'فشل في تطبيق المكياج');
@@ -148,11 +148,11 @@ export default function PrecisionLipDemo({ initialImage }: PrecisionLipDemoProps
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center">
             <Target className="ml-2 w-6 h-6 text-pink-600" />
-            نظام الكشف الاحترافي للشفاه - مستوى الصناعة
+            نظام الكشف الفوري للشفاه - تقنية الهاتف المحمول
           </div>
-          <Badge variant="outline" className="bg-gradient-to-r from-purple-50 to-pink-50">
+          <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-green-50">
             <CheckCircle className="w-3 h-3 ml-1" />
-            تقنية ModiFace المحترفة
+            تقنية YouCam الفورية
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -272,7 +272,7 @@ export default function PrecisionLipDemo({ initialImage }: PrecisionLipDemoProps
               ) : (
                 <>
                   <Smile className="w-5 h-5 ml-2" />
-                  تطبيق احترافي للمكياج
+                  تطبيق فوري للمكياج
                 </>
               )}
             </Button>
