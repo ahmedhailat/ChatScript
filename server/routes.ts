@@ -18,6 +18,8 @@ import { opencvProcessor } from "./opencv-face-processor";
 import { registerConsultationRoutes } from "./consultation-routes";
 import { seedDoctors } from "./seed-doctors";
 import { realtimeLipProcessor } from "./realtime-lip-processor";
+import { threeDFacialModeling } from "./three-d-facial-modeling";
+import { communicationPortal } from "./communication-portal";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
 const noseBeautificationProcessor = new NoseBeautificationProcessor();
@@ -670,6 +672,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: error instanceof Error ? error.message : "Unknown error" 
         });
       }
+    }
+  });
+
+  // 3D Facial Modeling API
+  app.post('/api/generate-3d-model', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image file provided' });
+      }
+
+      const { modelType = 'wireframe', viewAngle = 'front', showLandmarks = true } = req.body;
+      
+      console.log(`🎭 Generating 3D model: ${modelType} view`);
+      
+      const result = await threeDFacialModeling.generate3DModel(req.file.path, {
+        modelType: modelType as any,
+        viewAngle: viewAngle as any,
+        enhanceFeatures: req.body.enhanceFeatures === 'true',
+        showLandmarks: showLandmarks === 'true',
+        analysisDepth: req.body.analysisDepth || 'detailed'
+      });
+
+      res.json({
+        success: true,
+        modelImageUrl: result.modelImageUrl,
+        analysis: result.analysis,
+        confidence: result.confidence,
+        processingTime: Date.now() - parseInt(req.body.startTime || '0')
+      });
+
+    } catch (error) {
+      console.error('3D modeling error:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate 3D model', 
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Communication Portal APIs
+  app.post('/api/communication/send-message', async (req, res) => {
+    try {
+      const message = await communicationPortal.sendMessage(req.body);
+      res.json({ success: true, message });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  app.get('/api/communication/conversation/:consultationId', async (req, res) => {
+    try {
+      const messages = await communicationPortal.getConversationHistory(req.params.consultationId);
+      res.json({ success: true, messages });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  app.post('/api/communication/schedule-call', async (req, res) => {
+    try {
+      const videoCall = await communicationPortal.scheduleVideoCall(req.body);
+      res.json({ success: true, videoCall });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  app.post('/api/communication/start-call/:callId', async (req, res) => {
+    try {
+      const meetingDetails = await communicationPortal.startVideoCall(req.params.callId);
+      res.json({ success: true, meetingDetails });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  app.post('/api/communication/upload-file', upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file provided' });
+      }
+
+      const fileShare = await communicationPortal.uploadFile({
+        consultationId: req.body.consultationId,
+        uploadedBy: req.body.uploadedBy,
+        file: {
+          fileName: req.file.originalname,
+          fileType: req.body.fileType,
+          fileSize: req.file.size,
+          buffer: req.file.buffer
+        },
+        description: req.body.description
+      });
+
+      res.json({ success: true, fileShare });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  app.get('/api/communication/files/:consultationId', async (req, res) => {
+    try {
+      const files = await communicationPortal.getConsultationFiles(req.params.consultationId);
+      res.json({ success: true, files });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 

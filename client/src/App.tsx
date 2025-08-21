@@ -12,6 +12,8 @@ import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import SubscriptionPage from "@/pages/subscription";
 import PaymentPage from "@/pages/payment";
+import ThreeDModelingPage from "@/pages/3d-modeling";
+import CommunicationPage from "@/pages/communication";
 
 function Router() {
   return (
@@ -20,6 +22,8 @@ function Router() {
       <Route path="/demo" component={AIDemo} />
       <Route path="/tutorial" component={TutorialPage} />
       <Route path="/faceapp" component={FaceAppPage} />
+      <Route path="/3d-modeling" component={ThreeDModelingPage} />
+      <Route path="/communication" component={CommunicationPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/subscription" component={SubscriptionPage} />
