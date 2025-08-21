@@ -157,7 +157,7 @@ export default function ArabicCameraCapture({ onImageCapture, beforeImage }: Ara
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6" dir="rtl">
       <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
         <Camera className="text-medical-blue ml-3 w-5 h-5" />
-        تقاط صورة المريض
+        التقاط صورة المريض
       </h3>
       
       {/* Camera View */}

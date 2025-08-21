@@ -41,10 +41,10 @@ export default function ConsultationForm({ className }: ConsultationFormProps) {
   };
 
   return (
-    <div className={cn("bg-white rounded-xl shadow-sm border border-slate-200 p-6", className)}>
+    <div className={cn("bg-white rounded-xl shadow-sm border border-slate-200 p-6", className)} dir="rtl">
       <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
-        <ClipboardList className="text-medical-blue mr-3 w-5 h-5" />
-        Consultation Details
+        <ClipboardList className="text-medical-blue ml-3 w-5 h-5" />
+        تفاصيل الاستشارة
       </h3>
 
       <form onSubmit={handleSubmit}>
@@ -52,27 +52,27 @@ export default function ConsultationForm({ className }: ConsultationFormProps) {
           <div className="space-y-4">
             <div>
               <Label htmlFor="patientName" className="text-sm font-medium text-slate-700">
-                Patient Name
+                اسم المريض
               </Label>
               <Input
                 id="patientName"
                 type="text"
-                placeholder="Enter patient name"
+                placeholder="أدخل اسم المريض"
                 value={formData.patientName}
                 onChange={(e) => setFormData(prev => ({ ...prev, patientName: e.target.value }))}
-                className="mt-2"
+                className="mt-2 text-right"
                 data-testid="input-patient-name"
               />
             </div>
             
             <div>
               <Label htmlFor="age" className="text-sm font-medium text-slate-700">
-                Age
+                العمر
               </Label>
               <Input
                 id="age"
                 type="number"
-                placeholder="Patient age"
+                placeholder="عمر المريض"
                 value={formData.age}
                 onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
                 className="mt-2"

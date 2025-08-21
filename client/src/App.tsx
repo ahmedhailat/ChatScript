@@ -7,6 +7,10 @@ import Home from "@/pages/home";
 import AIDemo from "@/pages/ai-demo";
 import NotFound from "@/pages/not-found";
 import TutorialPage from "@/pages/tutorial";
+import LoginPage from "@/pages/login";
+import RegisterPage from "@/pages/register";
+import SubscriptionPage from "@/pages/subscription";
+import PaymentPage from "@/pages/payment";
 
 function Router() {
   return (
@@ -14,6 +18,10 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/demo" component={AIDemo} />
       <Route path="/tutorial" component={TutorialPage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={RegisterPage} />
+      <Route path="/subscription" component={SubscriptionPage} />
+      <Route path="/payment" component={PaymentPage} />
       <Route component={NotFound} />
     </Switch>
   );

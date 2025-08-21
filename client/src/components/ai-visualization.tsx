@@ -176,7 +176,7 @@ export default function AIVisualization({
           ) : (
             <Bot className="mr-2 w-4 h-4" />
           )}
-          {isProcessing ? 'Generating with AI...' : 'Generate AI Prediction'}
+          {isProcessing ? 'جاري التوليد بالذكاء الاصطناعي...' : 'توليد توقع بالذكاء الاصطناعي'}
         </Button>
       </div>
 
@@ -185,57 +185,57 @@ export default function AIVisualization({
         {/* Before Image */}
         <div className="space-y-3">
           <h4 className="font-medium text-slate-900 flex items-center">
-            <span className="w-2 h-2 bg-slate-400 rounded-full mr-2"></span>
-            Before
+            <span className="w-2 h-2 bg-slate-400 rounded-full ml-2"></span>
+            قبل العملية
           </h4>
           <div className="aspect-square bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center">
             {beforeImage ? (
               <img 
                 src={beforeImage} 
-                alt="Patient before photo" 
+                alt="صورة المريض قبل العملية" 
                 className="w-full h-full object-cover rounded-lg"
                 data-testid="img-before-analysis"
               />
             ) : (
               <div className="text-center" data-testid="placeholder-before-image">
                 <Bot className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                <p className="text-slate-600 font-medium">Upload Photo</p>
-                <p className="text-sm text-slate-500">Add patient image to begin</p>
+                <p className="text-slate-600 font-medium">رفع الصورة</p>
+                <p className="text-sm text-slate-500">أضف صورة المريض للبدء</p>
               </div>
             )}
           </div>
-          <p className="text-sm text-slate-500">Original patient photo</p>
+          <p className="text-sm text-slate-500">الصورة الأصلية للمريض</p>
         </div>
 
         {/* After Image */}
         <div className="space-y-3">
           <h4 className="font-medium text-slate-900 flex items-center">
-            <span className="w-2 h-2 bg-medical-success rounded-full mr-2"></span>
-            AI Prediction
+            <span className="w-2 h-2 bg-medical-success rounded-full ml-2"></span>
+            توقع الذكاء الاصطناعي
           </h4>
           <div className="aspect-square bg-gradient-to-br from-ai-purple/10 to-medical-blue/10 rounded-lg border-2 border-dashed border-ai-purple/30 flex items-center justify-center relative">
             {isProcessing ? (
               <div className="text-center" data-testid="ai-processing-indicator">
                 <Loader2 className="w-8 h-8 text-ai-purple animate-spin mx-auto mb-3" />
-                <p className="text-slate-600 font-medium">Processing with AI...</p>
-                <p className="text-sm text-slate-500">This may take 30-60 seconds</p>
+                <p className="text-slate-600 font-medium">جاري المعالجة بالذكاء الاصطناعي...</p>
+                <p className="text-sm text-slate-500">قد يستغرق 30-60 ثانية</p>
               </div>
             ) : afterImage ? (
               <img 
                 src={afterImage} 
-                alt="AI prediction" 
+                alt="توقع الذكاء الاصطناعي" 
                 className="w-full h-full object-cover rounded-lg"
                 data-testid="img-after-prediction"
               />
             ) : (
               <div className="text-center" data-testid="placeholder-ai-prediction">
                 <Bot className="w-12 h-12 text-ai-purple/50 mx-auto mb-3" />
-                <p className="text-slate-600 font-medium">AI Processing</p>
-                <p className="text-sm text-slate-500">Upload photo to see prediction</p>
+                <p className="text-slate-600 font-medium">معالجة الذكاء الاصطناعي</p>
+                <p className="text-sm text-slate-500">ارفع صورة لرؤية التوقع</p>
               </div>
             )}
           </div>
-          <p className="text-sm text-slate-500">Predicted surgical outcome</p>
+          <p className="text-sm text-slate-500">النتيجة الجراحية المتوقعة</p>
         </div>
       </div>
 

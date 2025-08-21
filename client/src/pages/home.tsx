@@ -37,18 +37,18 @@ export default function Home() {
               آمن ومتوافق مع معايير HIPAA ومصمم للمهنيين الطبيين.
             </p>
             
-            <div className="flex items-center space-x-4 text-sm">
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-shield-alt"></i>
-                <span>متوافق مع HIPAA</span>
+            <div className="flex items-center gap-6 text-sm" dir="rtl">
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xs">✓</span>
+                <span>متوافق مع معايير HIPAA</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-lock"></i>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs">🔒</span>
                 <span>مشفر بالكامل</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-certificate"></i>
-                <span>ذكاء اصطناعي طبي</span>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 text-xs">🧠</span>
+                <span>ذكاء اصطناعي طبي متقدم</span>
               </div>
             </div>
           </div>
