@@ -17,6 +17,7 @@ import { VirtualRhinoplastyProcessor } from "./virtual-rhinoplasty-processor";
 import { opencvProcessor } from "./opencv-face-processor";
 import { registerConsultationRoutes } from "./consultation-routes";
 import { seedDoctors } from "./seed-doctors";
+import { simplePrecisionLip } from "./simple-precision-lip";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
 const noseBeautificationProcessor = new NoseBeautificationProcessor();
@@ -415,6 +416,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Area makeup application error:', error);
       res.status(500).json({ 
         error: 'Failed to apply area-specific makeup',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Precision lip makeup endpoint
+  app.post("/api/apply-precision-makeup", upload.single("image"), async (req, res) => {
+    console.log("💋 Precision lip makeup request received");
+    
+    try {
+      const { region, color, intensity = 70, texture = 'gloss' } = req.body;
+      
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file provided" });
+      }
+
+      console.log(`Applying precision ${region} makeup with color ${color}, intensity ${intensity}%, texture ${texture}`);
+
+      if (region === 'lips') {
+        // Use simple precision lip processor for accurate lip application
+        try {
+          const processedImageUrl = await simplePrecisionLip.applyPreciseLipstick(
+            req.file.path,
+            {
+              color,
+              intensity: parseInt(intensity)
+            }
+          );
+
+          res.json({
+            success: true,
+            processedImageUrl: `/${processedImageUrl}`,
+            originalImageUrl: `/uploads/${req.file.filename}`,
+            region: 'lips',
+            color,
+            intensity: parseInt(intensity),
+            texture,
+            processingMethod: 'precision-lip',
+            message: 'تم تطبيق أحمر الشفاه بدقة داخل الحدود فقط'
+          });
+          
+        } catch (lipError) {
+          console.error('Precision lip processing failed:', lipError);
+          // Fallback to regular makeup processing
+          throw lipError;
+        }
+      } else {
+        // For other regions, use regular makeup processing
+        const processedImageUrl = await makeupProcessor.applyAreaSpecificMakeup(
+          req.file.path,
+          [{ region, color, intensity: parseInt(intensity) }],
+          parseInt(intensity)
+        );
+
+        res.json({
+          success: true,
+          processedImageUrl: `/${processedImageUrl}`,
+          originalImageUrl: `/uploads/${req.file.filename}`,
+          region,
+          color,
+          intensity: parseInt(intensity),
+          texture,
+          processingMethod: 'standard'
+        });
+      }
+
+    } catch (error) {
+      console.error('Precision makeup application error:', error);
+      res.status(500).json({ 
+        error: 'فشل في تطبيق المكياج الدقيق',
         details: (error as Error).message 
       });
     }
