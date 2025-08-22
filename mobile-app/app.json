@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "MedVision AI Mobile",
+    "slug": "medvision-ai-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "medvision",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1f2937"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.medvision.ai.mobile",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to camera to take photos for medical analysis.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select images for medical analysis.",
+        "NSMicrophoneUsageDescription": "This app needs access to microphone for voice notes and video calls.",
+        "CFBundleDisplayName": "MedVision AI"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1f2937"
+      },
+      "package": "com.medvision.ai.mobile",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-image-picker",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow MedVision AI to access your camera for medical photo analysis."
+        }
+      ]
+    ],
+    "extra": {
+      "serverUrl": "https://your-replit-app.replit.app",
+      "eas": {
+        "projectId": "medvision-ai-mobile"
+      }
+    }
+  }
+}
