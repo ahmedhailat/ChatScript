@@ -13,11 +13,9 @@ export default function CommunicationPage() {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/">
-                <a className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors">
-                  <Home className="w-5 h-5" />
-                  <span>الرئيسية</span>
-                </a>
+              <Link href="/" className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors">
+                <Home className="w-5 h-5" />
+                <span>الرئيسية</span>
               </Link>
               <ArrowRight className="w-4 h-4 text-gray-400" />
               <span className="text-gray-700">بوابة التواصل الطبي</span>

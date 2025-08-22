@@ -65,12 +65,14 @@ export default function DoctorPortfolioPage() {
   const queryClient = useQueryClient();
 
   // جلب قائمة الأطباء
-  const { data: doctors = [], isLoading: loadingDoctors } = useQuery({
+  const { data: doctorsData, isLoading: loadingDoctors } = useQuery({
     queryKey: ['/api/doctors'],
   });
+  
+  const doctors = Array.isArray(doctorsData) ? doctorsData : [];
 
   // جلب ملفات الأطباء
-  const { data: portfolios = [], isLoading: loadingPortfolios } = useQuery({
+  const { data: portfoliosData, isLoading: loadingPortfolios } = useQuery({
     queryKey: ['/api/doctor-portfolios', selectedDoctor, procedureFilter],
     queryFn: async () => {
       let url = '/api/doctor-portfolios';
@@ -88,9 +90,17 @@ export default function DoctorPortfolioPage() {
       }
       
       const response = await apiRequest('GET', url);
-      return response.json();
+      const data = await response.json();
+      return data.portfolios || data; // Handle both array and object responses
     },
   });
+
+  // Extract portfolios array from the response
+  const portfolios = Array.isArray(portfoliosData?.portfolios) 
+    ? portfoliosData.portfolios 
+    : Array.isArray(portfoliosData) 
+    ? portfoliosData 
+    : [];
 
   // mutation لإضافة عملية جديدة للملف
   const addPortfolioMutation = useMutation({
@@ -289,7 +299,7 @@ export default function DoctorPortfolioPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">جميع الأطباء</SelectItem>
-                        {doctors.map((doctor: Doctor) => (
+                        {doctors.map((doctor: any) => (
                           <SelectItem key={doctor.id} value={doctor.id}>
                             {doctor.name}
                           </SelectItem>
@@ -361,7 +371,7 @@ export default function DoctorPortfolioPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {doctors.map((doctor: Doctor) => (
+                {doctors.map((doctor: any) => (
                   <DoctorCard key={doctor.id} doctor={doctor} />
                 ))}
               </div>
