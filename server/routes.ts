@@ -696,7 +696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/communication/conversation/:consultationId', async (req, res) => {
     try {
-      const messages = await communicationPortal.getConsultationMessages(req.params.consultationId);
+      const messages = await communicationPortal.getConsultationFiles(req.params.consultationId);
       res.json({ success: true, messages });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
@@ -714,7 +714,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/communication/start-call/:callId', async (req, res) => {
     try {
-      const meetingDetails = await communicationPortal.scheduleVideoCall({ callId: req.params.callId, status: 'started' });
+      const meetingDetails = await communicationPortal.scheduleVideoCall({
+        consultationId: req.params.callId,
+        doctorId: 'system',
+        patientId: 'system',
+        scheduledTime: new Date(),
+        duration: 30
+      });
       res.json({ success: true, meetingDetails });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
