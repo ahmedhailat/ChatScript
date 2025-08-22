@@ -124,15 +124,11 @@ export default function ThreeDModelingPage() {
 
         {/* Navigation Links */}
         <div className="mt-8 flex justify-center space-x-4">
-          <Link href="/faceapp">
-            <a className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              استوديو تحرير الوجه
-            </a>
+          <Link href="/faceapp" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            استوديو تحرير الوجه
           </Link>
-          <Link href="/communication">
-            <a className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-              بوابة التواصل الطبي
-            </a>
+          <Link href="/communication" className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+            بوابة التواصل الطبي
           </Link>
         </div>
       </div>
