@@ -493,8 +493,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // استخدام نظام MediaPipe المحسن مع كشف دقيق للملامح
       const landmarks = await opencvProcessor.detectFaceLandmarks(req.file.path);
       
-      if (!landmarks.success) {
-        throw new Error(landmarks.error || 'فشل في كشف ملامح الوجه');
+      if (!landmarks || !landmarks.landmarks) {
+        throw new Error('فشل في كشف ملامح الوجه');
       }
 
       // تحسين البيانات المعادة
@@ -521,7 +521,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         confidence: landmarks.confidence || 0.9,
         imageUrl: `/uploads/${req.file.filename}`,
-        totalLandmarks: landmarks.landmarks ? landmarks.landmarks.length : 0
+        totalLandmarks: landmarks.landmarks.length
       };
 
       res.json(enhancedResponse);
@@ -567,10 +567,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             {
               type: region === 'lips' ? 'lipstick' : 
                     region === 'eyes' ? 'eyeshadow' :
-                    region === 'cheeks' ? 'blush' : 'highlighter',
+                    region === 'cheeks' ? 'blush' : 'foundation',
               color: color,
               intensity: parseInt(intensity),
-              area: { region }
+              area: { x: 0, y: 0, width: 100, height: 100 }
             }
           );
           break;
@@ -696,7 +696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/communication/conversation/:consultationId', async (req, res) => {
     try {
-      const messages = await communicationPortal.getConversationHistory(req.params.consultationId);
+      const messages = await communicationPortal.getConsultationMessages(req.params.consultationId);
       res.json({ success: true, messages });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
@@ -714,7 +714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/communication/start-call/:callId', async (req, res) => {
     try {
-      const meetingDetails = await communicationPortal.startVideoCall(req.params.callId);
+      const meetingDetails = await communicationPortal.scheduleVideoCall({ callId: req.params.callId, status: 'started' });
       res.json({ success: true, meetingDetails });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
@@ -730,12 +730,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fileShare = await communicationPortal.uploadFile({
         consultationId: req.body.consultationId,
         uploadedBy: req.body.uploadedBy,
-        file: {
-          fileName: req.file.originalname,
-          fileType: req.body.fileType,
-          fileSize: req.file.size,
-          buffer: req.file.buffer
-        },
+        fileName: req.file.originalname,
+        fileType: req.body.fileType,
+        fileUrl: `/uploads/${req.file.filename}`,
+        fileSize: req.file.size,
         description: req.body.description
       });
 
