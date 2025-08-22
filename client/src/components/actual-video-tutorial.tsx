@@ -156,7 +156,16 @@ export function ActualVideoTutorial() {
               className="w-full aspect-video"
               src={videoSrc}
               poster="/attached_assets/image_1755760857743.png"
-            />
+              onError={(e) => {
+                console.log('Video loading error handled gracefully');
+              }}
+              onCanPlay={() => console.log('Video can play')}
+            >
+              <source src={videoSrc} type="video/mp4" />
+              <p className="text-white text-center p-4">
+                عذراً، لا يمكن تشغيل الفيديو. يرجى المحاولة لاحقاً.
+              </p>
+            </video>
             
             {/* Video Overlay Controls */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20">

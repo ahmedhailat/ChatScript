@@ -169,8 +169,16 @@ export function OpenSourceTutorial() {
                   src={selectedVideo.url}
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
+                  onError={(e) => {
+                    console.log('Video loading error handled gracefully');
+                  }}
                   poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4MCIgaGVpZ2h0PSI3MjAiIHZpZXdCb3g9IjAgMCAxMjgwIDcyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyODAiIGhlaWdodD0iNzIwIiBmaWxsPSIjMUYyOTM3Ii8+Cjx0ZXh0IHg9IjY0MCIgeT0iMzYwIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSI0OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+8J+OrSDZhdrYp9in2Yog2KfZhNmB2YrYr9mK2Ygg2KfZhNiq2LnZhNmK2YXZiiDYp9mE2YXZgdiq2YjYrSDYp9mE2YXYtdiv2LEg8J+OrTwvdGV4dD4KPHN2ZyB4PSI1ODAiIHk9IjMwMCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjgiPgo8cGF0aCBkPSJNNDggNDhWMTQ0TDE0NCA5Nkw0OCA0OFoiLz4KPC9zdmc+Cjwvc3ZnPgo="
-                />
+                >
+                  <source src={selectedVideo.url} type="video/mp4" />
+                  <p className="text-white text-center p-4">
+                    لا يمكن تشغيل الفيديو حالياً. جميع الميزات تعمل بالتطبيق.
+                  </p>
+                </video>
                 
                 {/* Video Controls Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
