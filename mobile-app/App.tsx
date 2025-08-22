@@ -10,57 +10,94 @@ import {
   Dimensions 
 } from 'react-native';
 import SimpleMobileFaceApp from './src/components/SimpleMobileFaceApp';
+import { useLanguage } from './src/hooks/useLanguage';
 
 const { width } = Dimensions.get('window');
 
 export default function App() {
   const [activeScreen, setActiveScreen] = useState('home');
+  const { language, isRTL, changeLanguage, t, getTextAlign, getFlexDirection } = useLanguage();
 
   const screens = [
-    { id: 'home', name: 'الرئيسية', icon: '🏠' },
-    { id: 'faceapp', name: 'تحرير الوجه', icon: '🎭' },
-    { id: '3d', name: 'نمذجة ثلاثية الأبعاد', icon: '📐' },
-    { id: 'consultation', name: 'استشارة طبية', icon: '🏥' },
+    { id: 'home', name: t('home'), icon: '🏠' },
+    { id: 'faceapp', name: t('faceApp'), icon: '🎭' },
+    { id: '3d', name: t('modeling3D'), icon: '📐' },
+    { id: 'consultation', name: t('consultation'), icon: '🏥' },
   ];
 
   const renderHomeScreen = () => (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       
-      {/* Header */}
+      {/* Header with Language Toggle */}
       <View style={styles.header}>
-        <Text style={styles.title}>🎭 MedVision AI Mobile</Text>
-        <Text style={styles.subtitle}>منصة التصور الطبي والتجميل الذكية</Text>
-        <Text style={styles.version}>النسخة المحمولة لنظامي iOS و Android</Text>
+        <View style={[styles.languageToggle, { flexDirection: getFlexDirection() }]}>
+          <TouchableOpacity
+            style={[styles.langButton, language === 'ar' && styles.activeLangButton]}
+            onPress={() => changeLanguage('ar')}
+          >
+            <Text style={[styles.langText, language === 'ar' && styles.activeLangText]}>
+              {t('arabic')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.langButton, language === 'en' && styles.activeLangButton]}
+            onPress={() => changeLanguage('en')}
+          >
+            <Text style={[styles.langText, language === 'en' && styles.activeLangText]}>
+              {t('english')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        
+        <Text style={[styles.title, { textAlign: getTextAlign() }]}>
+          🎭 {t('appTitle')}
+        </Text>
+        <Text style={[styles.subtitle, { textAlign: getTextAlign() }]}>
+          {t('appSubtitle')}
+        </Text>
+        <Text style={[styles.version, { textAlign: getTextAlign() }]}>
+          {t('mobileVersion')}
+        </Text>
       </View>
 
       {/* Quick Stats */}
-      <View style={styles.statsSection}>
+      <View style={[styles.statsSection, { flexDirection: getFlexDirection() }]}>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>98.3%</Text>
-          <Text style={styles.statLabel}>دقة المطابقة</Text>
+          <Text style={[styles.statLabel, { textAlign: getTextAlign() }]}>
+            {t('accuracy')}
+          </Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>68+</Text>
-          <Text style={styles.statLabel}>نقطة مرجعية</Text>
+          <Text style={[styles.statLabel, { textAlign: getTextAlign() }]}>
+            {t('landmarks')}
+          </Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>1000+</Text>
-          <Text style={styles.statLabel}>مستخدم سعيد</Text>
+          <Text style={[styles.statLabel, { textAlign: getTextAlign() }]}>
+            {t('happyUsers')}
+          </Text>
         </View>
       </View>
 
       {/* Main Features */}
       <View style={styles.featuresSection}>
-        <Text style={styles.sectionTitle}>✨ الميزات الرئيسية</Text>
+        <Text style={[styles.sectionTitle, { textAlign: getTextAlign() }]}>
+          {t('mainFeatures')}
+        </Text>
         
         <TouchableOpacity 
           style={[styles.featureCard, { backgroundColor: '#ec4899' }]}
           onPress={() => setActiveScreen('faceapp')}
         >
           <Text style={styles.featureIcon}>💄</Text>
-          <Text style={styles.featureTitle}>استوديو تحرير الوجه</Text>
-          <Text style={styles.featureDescription}>
-            مكياج احترافي، تغيير العمر، تحويل الجنس، وتأثيرات جمالية متقدمة
+          <Text style={[styles.featureTitle, { textAlign: getTextAlign() }]}>
+            {t('faceEditingStudio')}
+          </Text>
+          <Text style={[styles.featureDescription, { textAlign: getTextAlign() }]}>
+            {t('faceEditingDesc')}
           </Text>
         </TouchableOpacity>
 
@@ -69,9 +106,11 @@ export default function App() {
           onPress={() => setActiveScreen('3d')}
         >
           <Text style={styles.featureIcon}>🎭</Text>
-          <Text style={styles.featureTitle}>النمذجة ثلاثية الأبعاد</Text>
-          <Text style={styles.featureDescription}>
-            تحليل الوجه ثلاثي الأبعاد مع 68+ نقطة مرجعية وتقييم التماثل
+          <Text style={[styles.featureTitle, { textAlign: getTextAlign() }]}>
+            {t('modeling3DTitle')}
+          </Text>
+          <Text style={[styles.featureDescription, { textAlign: getTextAlign() }]}>
+            {t('modeling3DDesc')}
           </Text>
         </TouchableOpacity>
 
@@ -80,45 +119,61 @@ export default function App() {
           onPress={() => setActiveScreen('consultation')}
         >
           <Text style={styles.featureIcon}>🏥</Text>
-          <Text style={styles.featureTitle}>الاستشارة الطبية</Text>
-          <Text style={styles.featureDescription}>
-            تواصل آمن مع الأطباء، مكالمات فيديو، ومشاركة الملفات الطبية
+          <Text style={[styles.featureTitle, { textAlign: getTextAlign() }]}>
+            {t('medicalConsultation')}
+          </Text>
+          <Text style={[styles.featureDescription, { textAlign: getTextAlign() }]}>
+            {t('medicalConsultationDesc')}
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Technology Info */}
       <View style={styles.techSection}>
-        <Text style={styles.sectionTitle}>🚀 التقنيات المستخدمة</Text>
+        <Text style={[styles.sectionTitle, { textAlign: getTextAlign() }]}>
+          {t('technologies')}
+        </Text>
         <View style={styles.techGrid}>
           <View style={styles.techCard}>
             <Text style={styles.techIcon}>🧠</Text>
-            <Text style={styles.techName}>ذكاء اصطناعي</Text>
+            <Text style={[styles.techName, { textAlign: getTextAlign() }]}>
+              {t('artificialIntelligence')}
+            </Text>
           </View>
           <View style={styles.techCard}>
             <Text style={styles.techIcon}>🔒</Text>
-            <Text style={styles.techName}>تشفير HIPAA</Text>
+            <Text style={[styles.techName, { textAlign: getTextAlign() }]}>
+              {t('hipaaEncryption')}
+            </Text>
           </View>
           <View style={styles.techCard}>
             <Text style={styles.techIcon}>☁️</Text>
-            <Text style={styles.techName}>حوسبة سحابية</Text>
+            <Text style={[styles.techName, { textAlign: getTextAlign() }]}>
+              {t('cloudComputing')}
+            </Text>
           </View>
           <View style={styles.techCard}>
             <Text style={styles.techIcon}>⚡</Text>
-            <Text style={styles.techName}>معالجة فورية</Text>
+            <Text style={[styles.techName, { textAlign: getTextAlign() }]}>
+              {t('realtimeProcessing')}
+            </Text>
           </View>
         </View>
       </View>
 
       {/* Server Status */}
       <View style={styles.statusSection}>
-        <Text style={styles.statusTitle}>🔗 حالة الاتصال</Text>
-        <View style={styles.statusCard}>
+        <Text style={[styles.statusTitle, { textAlign: getTextAlign() }]}>
+          {t('connectionStatus')}
+        </Text>
+        <View style={[styles.statusCard, { flexDirection: getFlexDirection() }]}>
           <View style={styles.statusIndicator} />
-          <Text style={styles.statusText}>متصل بخادم MedVision AI</Text>
+          <Text style={[styles.statusText, { textAlign: getTextAlign() }]}>
+            {t('connectedToServer')}
+          </Text>
         </View>
-        <Text style={styles.statusNote}>
-          يتم الاتصال بالخادم الرئيسي لمعالجة الصور والتحليل الطبي
+        <Text style={[styles.statusNote, { textAlign: getTextAlign() }]}>
+          {t('serverNote')}
         </Text>
       </View>
     </ScrollView>
@@ -128,21 +183,33 @@ export default function App() {
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.comingSoonContainer}>
         <Text style={styles.comingSoonIcon}>🏥</Text>
-        <Text style={styles.comingSoonTitle}>الاستشارة الطبية</Text>
-        <Text style={styles.comingSoonText}>
-          تواصل مباشر وآمن مع الأطباء المتخصصين
+        <Text style={[styles.comingSoonTitle, { textAlign: getTextAlign() }]}>
+          {t('comingSoonTitle')}
+        </Text>
+        <Text style={[styles.comingSoonText, { textAlign: getTextAlign() }]}>
+          {t('comingSoonDesc')}
         </Text>
         <View style={styles.comingSoonFeatures}>
-          <Text style={styles.comingSoonFeature}>💬 رسائل فورية مشفرة</Text>
-          <Text style={styles.comingSoonFeature}>📹 مكالمات فيديو عالية الجودة</Text>
-          <Text style={styles.comingSoonFeature}>📁 مشاركة آمنة للملفات الطبية</Text>
-          <Text style={styles.comingSoonFeature}>📅 جدولة المواعيد التلقائية</Text>
+          <Text style={[styles.comingSoonFeature, { textAlign: getTextAlign() }]}>
+            {t('encryptedMessages')}
+          </Text>
+          <Text style={[styles.comingSoonFeature, { textAlign: getTextAlign() }]}>
+            {t('videoCallsHD')}
+          </Text>
+          <Text style={[styles.comingSoonFeature, { textAlign: getTextAlign() }]}>
+            {t('secureFileSharing')}
+          </Text>
+          <Text style={[styles.comingSoonFeature, { textAlign: getTextAlign() }]}>
+            {t('autoScheduling')}
+          </Text>
         </View>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => setActiveScreen('home')}
         >
-          <Text style={styles.backButtonText}>العودة للرئيسية</Text>
+          <Text style={styles.backButtonText}>
+            {t('backToHome')}
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -151,7 +218,14 @@ export default function App() {
   const renderCurrentScreen = () => {
     switch (activeScreen) {
       case 'faceapp':
-        return <SimpleMobileFaceApp serverUrl="https://your-app.replit.app" />;
+        return <SimpleMobileFaceApp 
+          serverUrl="https://your-app.replit.app" 
+          language={language}
+          isRTL={isRTL}
+          t={t}
+          getTextAlign={getTextAlign}
+          getFlexDirection={getFlexDirection}
+        />;
       case '3d':
         return renderConsultationScreen(); // Same as consultation for now
       case 'consultation':
@@ -444,5 +518,29 @@ const styles = StyleSheet.create({
   activeNavText: {
     color: '#3b82f6',
     fontWeight: '600',
+  },
+  languageToggle: {
+    alignSelf: 'flex-end',
+    marginBottom: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 20,
+    padding: 5,
+  },
+  langButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 15,
+    marginHorizontal: 2,
+  },
+  activeLangButton: {
+    backgroundColor: '#ffffff',
+  },
+  langText: {
+    fontSize: 12,
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+  activeLangText: {
+    color: '#1f2937',
   },
 });

@@ -16,10 +16,20 @@ const { width } = Dimensions.get('window');
 
 interface SimpleMobileFaceAppProps {
   serverUrl?: string;
+  language?: 'ar' | 'en';
+  isRTL?: boolean;
+  t?: (key: string) => string;
+  getTextAlign?: () => 'left' | 'right';
+  getFlexDirection?: () => 'row' | 'row-reverse';
 }
 
 export default function SimpleMobileFaceApp({ 
-  serverUrl = 'https://your-replit-app.replit.app' 
+  serverUrl = 'https://your-replit-app.replit.app',
+  language = 'ar',
+  isRTL = true,
+  t = (key) => key,
+  getTextAlign = () => 'right',
+  getFlexDirection = () => 'row-reverse'
 }: SimpleMobileFaceAppProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [processedImage, setProcessedImage] = useState<string | null>(null);
@@ -27,17 +37,17 @@ export default function SimpleMobileFaceApp({
   const [selectedEffect, setSelectedEffect] = useState('makeup');
 
   const effects = [
-    { id: 'makeup', name: 'مكياج احترافي', icon: '💄', color: '#ec4899' },
-    { id: 'age', name: 'تغيير العمر', icon: '⏰', color: '#8b5cf6' },
-    { id: 'gender', name: 'تغيير الجنس', icon: '👥', color: '#06b6d4' },
-    { id: 'beauty', name: 'تجميل الوجه', icon: '✨', color: '#10b981' },
-    { id: '3d', name: 'نموذج ثلاثي الأبعاد', icon: '🎭', color: '#f59e0b' }
+    { id: 'makeup', name: t('professionalMakeup'), icon: '💄', color: '#ec4899' },
+    { id: 'age', name: t('ageTransformation'), icon: '⏰', color: '#8b5cf6' },
+    { id: 'gender', name: t('genderTransformation'), icon: '👥', color: '#06b6d4' },
+    { id: 'beauty', name: t('faceBeautification'), icon: '✨', color: '#10b981' },
+    { id: '3d', name: t('modeling3D'), icon: '🎭', color: '#f59e0b' }
   ];
 
   const requestPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('تنبيه', 'نحتاج إذن للوصول إلى الصور');
+      Alert.alert(t('warning'), 'Permission needed to access photos');
       return false;
     }
     return true;
@@ -63,7 +73,7 @@ export default function SimpleMobileFaceApp({
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('تنبيه', 'نحتاج إذن للوصول إلى الكاميرا');
+      Alert.alert(t('warning'), 'Camera permission needed');
       return;
     }
 
@@ -81,7 +91,7 @@ export default function SimpleMobileFaceApp({
 
   const processImage = async () => {
     if (!selectedImage) {
-      Alert.alert('تنبيه', 'يرجى اختيار صورة أولاً');
+      Alert.alert(t('warning'), t('selectImageFirst'));
       return;
     }
 
@@ -116,15 +126,15 @@ export default function SimpleMobileFaceApp({
       
       if (result.success) {
         setProcessedImage(`${serverUrl}${result.processedImageUrl}`);
-        Alert.alert('نجح!', 'تم تطبيق التأثير بنجاح! 🎉');
+        Alert.alert(t('success'), t('effectAppliedSuccess'));
       } else {
-        Alert.alert('خطأ', result.error || 'فشل في معالجة الصورة');
+        Alert.alert(t('error'), result.error || 'Processing failed');
       }
     } catch (error) {
       console.error('Processing error:', error);
       // Show demo result for development
       setProcessedImage(selectedImage);
-      Alert.alert('تجريبي', 'هذه نسخة تجريبية. سيتم الاتصال بالخادم عند النشر.');
+      Alert.alert(t('demoMode'), t('demoNote'));
     } finally {
       setIsProcessing(false);
     }
@@ -137,39 +147,49 @@ export default function SimpleMobileFaceApp({
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: selectedEffectData?.color || '#6366f1' }]}>
-        <Text style={styles.title}>🎭 MedVision AI Mobile</Text>
-        <Text style={styles.subtitle}>استوديو تحرير الوجه المحمول</Text>
-        <Text style={styles.version}>النسخة المحمولة v1.0</Text>
+        <Text style={[styles.title, { textAlign: getTextAlign() }]}>
+          🎭 {t('appTitle')}
+        </Text>
+        <Text style={[styles.subtitle, { textAlign: getTextAlign() }]}>
+          {t('professionalStudio')}
+        </Text>
+        <Text style={[styles.version, { textAlign: getTextAlign() }]}>
+          {language === 'ar' ? 'النسخة المحمولة v1.0' : 'Mobile Version v1.0'}
+        </Text>
       </View>
 
       {/* Image Selection Buttons */}
-      <View style={styles.buttonRow}>
+      <View style={[styles.buttonRow, { flexDirection: getFlexDirection() }]}>
         <TouchableOpacity style={styles.cameraButton} onPress={takePhoto}>
           <Text style={styles.buttonIcon}>📷</Text>
-          <Text style={styles.buttonText}>التقط صورة</Text>
+          <Text style={styles.buttonText}>{t('takePhoto')}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.galleryButton} onPress={selectImage}>
           <Text style={styles.buttonIcon}>🖼️</Text>
-          <Text style={styles.buttonText}>اختر من المعرض</Text>
+          <Text style={styles.buttonText}>{t('selectFromGallery')}</Text>
         </TouchableOpacity>
       </View>
 
       {/* Images Display */}
       {selectedImage && (
         <View style={styles.imageSection}>
-          <View style={styles.imageRow}>
+          <View style={[styles.imageRow, { flexDirection: getFlexDirection() }]}>
             <View style={styles.imageContainer}>
-              <Text style={styles.imageLabel}>الأصلية</Text>
+              <Text style={[styles.imageLabel, { textAlign: getTextAlign() }]}>
+                {t('originalImage')}
+              </Text>
               <Image source={{ uri: selectedImage }} style={styles.image} />
             </View>
             
             {processedImage && (
               <View style={styles.imageContainer}>
-                <Text style={styles.imageLabel}>النتيجة</Text>
+                <Text style={[styles.imageLabel, { textAlign: getTextAlign() }]}>
+                  {t('result')}
+                </Text>
                 <Image source={{ uri: processedImage }} style={styles.image} />
                 <View style={styles.successBadge}>
-                  <Text style={styles.successText}>✨ تم التطبيق</Text>
+                  <Text style={styles.successText}>{t('applied')}</Text>
                 </View>
               </View>
             )}
@@ -179,7 +199,9 @@ export default function SimpleMobileFaceApp({
 
       {/* Effects Selection */}
       <View style={styles.effectsSection}>
-        <Text style={styles.sectionTitle}>اختر التأثير المطلوب</Text>
+        <Text style={[styles.sectionTitle, { textAlign: getTextAlign() }]}>
+          {t('selectEffect')}
+        </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.effectsScroll}>
           {effects.map((effect) => (
             <TouchableOpacity
@@ -194,6 +216,7 @@ export default function SimpleMobileFaceApp({
               <Text style={styles.effectIcon}>{effect.icon}</Text>
               <Text style={[
                 styles.effectText,
+                { textAlign: getTextAlign() },
                 selectedEffect === effect.id && styles.selectedEffectText
               ]}>
                 {effect.name}
@@ -214,7 +237,7 @@ export default function SimpleMobileFaceApp({
         disabled={!selectedImage || isProcessing}
       >
         <Text style={styles.processButtonText}>
-          {isProcessing ? '⏳ جاري المعالجة...' : `✨ تطبيق ${selectedEffectData?.name}`}
+          {isProcessing ? t('processing') : `${t('applyEffect')} ${selectedEffectData?.name}`}
         </Text>
       </TouchableOpacity>
 
