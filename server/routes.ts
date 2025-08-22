@@ -1113,6 +1113,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Communication Portal API Routes
+  
+  // Send message endpoint
+  app.post('/api/communication/send-message', async (req, res) => {
+    try {
+      const { consultationId, senderId, senderType, content, messageType, attachmentUrl } = req.body;
+      
+      console.log(`💬 Sending message in consultation ${consultationId}`);
+      
+      const message = await communicationPortal.sendMessage({
+        consultationId,
+        senderId,
+        senderType,
+        content,
+        messageType: messageType || 'text',
+        attachmentUrl
+      });
+      
+      res.json({ success: true, message });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في إرسال الرسالة',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Get messages for consultation
+  app.get('/api/communication/messages/:consultationId', async (req, res) => {
+    try {
+      const { consultationId } = req.params;
+      const messages = await communicationPortal.getMessages(consultationId);
+      res.json({ success: true, messages });
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في جلب الرسائل',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Schedule video call
+  app.post('/api/communication/schedule-video-call', async (req, res) => {
+    try {
+      const { consultationId, doctorId, patientId, scheduledTime, duration } = req.body;
+      
+      console.log(`📹 Scheduling video call for consultation ${consultationId}`);
+      
+      const videoCall = await communicationPortal.scheduleVideoCall({
+        consultationId,
+        doctorId,
+        patientId,
+        scheduledTime: new Date(scheduledTime),
+        duration: parseInt(duration) || 30
+      });
+      
+      res.json({ success: true, videoCall });
+    } catch (error) {
+      console.error('Error scheduling video call:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في جدولة مكالمة الفيديو',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Upload file for consultation
+  app.post('/api/communication/upload-file', upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'لم يتم رفع أي ملف' });
+      }
+
+      const { consultationId, uploadedBy, fileType, description } = req.body;
+      
+      console.log(`📎 Uploading file to consultation ${consultationId}`);
+      
+      const fileShare = await communicationPortal.uploadFile({
+        consultationId,
+        uploadedBy,
+        fileName: req.file.originalname,
+        fileType: fileType || 'document',
+        fileUrl: req.file.path,
+        fileSize: req.file.size,
+        description
+      });
+      
+      res.json({ success: true, fileShare });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في رفع الملف',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Get consultation files
+  app.get('/api/communication/files/:consultationId', async (req, res) => {
+    try {
+      const { consultationId } = req.params;
+      const files = await communicationPortal.getConsultationFiles(consultationId);
+      res.json({ success: true, files });
+    } catch (error) {
+      console.error('Error fetching consultation files:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في جلب ملفات الاستشارة',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Mark messages as read
+  app.post('/api/communication/mark-read', async (req, res) => {
+    try {
+      const { messageIds } = req.body;
+      await communicationPortal.markMessagesAsRead(messageIds);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في تحديد الرسائل كمقروءة',
+        details: (error as Error).message 
+      });
+    }
+  });
+
   // Register consultation booking routes
   registerConsultationRoutes(app);
 

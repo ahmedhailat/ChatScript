@@ -94,7 +94,7 @@ export default function CommunicationPortal() {
   const loadConversationHistory = async () => {
     setIsLoadingMessages(true);
     try {
-      const response = await apiRequest('GET', `/api/communication/conversation/${consultationId}`);
+      const response = await apiRequest('GET', `/api/communication/messages/${consultationId}`);
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
@@ -207,7 +207,7 @@ export default function CommunicationPortal() {
         duration: 30
       };
 
-      const response = await apiRequest('POST', '/api/communication/schedule-call', callData);
+      const response = await apiRequest('POST', '/api/communication/schedule-video-call', callData);
       if (response.ok) {
         const result = await response.json();
         if (result.success) {

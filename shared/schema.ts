@@ -99,7 +99,55 @@ export type Doctor = typeof doctors.$inferSelect;
 export type InsertDoctor = typeof doctors.$inferInsert;
 export type TimeSlot = typeof timeSlots.$inferSelect;
 export type InsertTimeSlot = typeof timeSlots.$inferInsert;
+// Communication Portal Tables
+export const messages = pgTable("messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  consultationId: varchar("consultation_id").references(() => bookingConsultations.id).notNull(),
+  senderId: varchar("sender_id").notNull(),
+  senderType: varchar("sender_type").notNull(), // 'doctor' | 'patient'
+  content: text("content").notNull(),
+  messageType: varchar("message_type").default("text"), // 'text' | 'image' | 'file' | 'voice_note'
+  attachmentUrl: varchar("attachment_url"),
+  isRead: boolean("is_read").default(false),
+  replyToMessageId: varchar("reply_to_message_id"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const videoCalls = pgTable("video_calls", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  consultationId: varchar("consultation_id").references(() => bookingConsultations.id).notNull(),
+  doctorId: varchar("doctor_id").references(() => doctors.id).notNull(),
+  patientId: varchar("patient_id").references(() => users.id).notNull(),
+  scheduledTime: timestamp("scheduled_time").notNull(),
+  duration: integer("duration").default(30), // minutes
+  status: varchar("status").default("scheduled"), // 'scheduled' | 'active' | 'completed' | 'cancelled'
+  meetingUrl: varchar("meeting_url"),
+  recordingUrl: varchar("recording_url"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const fileShares = pgTable("file_shares", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  consultationId: varchar("consultation_id").references(() => bookingConsultations.id).notNull(),
+  uploadedBy: varchar("uploaded_by").notNull(),
+  fileName: varchar("file_name").notNull(),
+  fileType: varchar("file_type").notNull(), // 'image' | 'document' | 'medical_report' | 'prescription'
+  fileUrl: varchar("file_url").notNull(),
+  fileSize: integer("file_size").default(0),
+  description: text("description"),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+});
+
 export type InsertPatient = z.infer<typeof insertPatientSchema>;
 export type Patient = typeof patients.$inferSelect;
 export type InsertConsultation = z.infer<typeof insertConsultationSchema>;
 export type Consultation = typeof consultations.$inferSelect;
+
+// Communication Portal Types
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = typeof messages.$inferInsert;
+export type VideoCall = typeof videoCalls.$inferSelect;
+export type InsertVideoCall = typeof videoCalls.$inferInsert;
+export type FileShare = typeof fileShares.$inferSelect;
+export type InsertFileShare = typeof fileShares.$inferInsert;
