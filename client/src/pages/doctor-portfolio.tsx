@@ -96,11 +96,12 @@ export default function DoctorPortfolioPage() {
   });
 
   // Extract portfolios array from the response
-  const portfolios = Array.isArray(portfoliosData?.portfolios) 
-    ? portfoliosData.portfolios 
-    : Array.isArray(portfoliosData) 
-    ? portfoliosData 
-    : [];
+  const portfolios = (() => {
+    if (!portfoliosData) return [];
+    if (Array.isArray(portfoliosData.portfolios)) return portfoliosData.portfolios;
+    if (Array.isArray(portfoliosData)) return portfoliosData;
+    return [];
+  })();
 
   // mutation لإضافة عملية جديدة للملف
   const addPortfolioMutation = useMutation({
@@ -343,15 +344,13 @@ export default function DoctorPortfolioPage() {
                 <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
                 <p>جاري تحميل ملفات العمليات...</p>
               </div>
-            ) : (
+            ) : Array.isArray(portfolios) && portfolios.length > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {portfolios.map((portfolio: DoctorPortfolio) => (
                   <PortfolioCard key={portfolio.id} portfolio={portfolio} />
                 ))}
               </div>
-            )}
-
-            {portfolios.length === 0 && !loadingPortfolios && (
+            ) : (
               <Card className="text-center py-8">
                 <CardContent>
                   <Camera className="w-16 h-16 mx-auto mb-4 text-gray-400" />
@@ -360,6 +359,8 @@ export default function DoctorPortfolioPage() {
                 </CardContent>
               </Card>
             )}
+
+
           </TabsContent>
 
           {/* علامة تبويب الأطباء */}
