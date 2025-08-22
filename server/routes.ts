@@ -136,60 +136,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const faceAreas = typeof areas === 'string' ? JSON.parse(areas) : areas;
       const surgicalAdjustments = typeof adjustments === 'string' ? JSON.parse(adjustments) : adjustments;
       
-      // First try OpenAI for best results
-      try {
-        const aiRequest = {
-          imageUrl: req.file.path,
-          procedureType: procedureType || 'rhinoplasty',
-          intensity: parseInt(intensity),
-        };
-
-        const aiResultUrl = await aiProcessor.generateSurgicalVisualization(aiRequest);
-        
-        return res.json({ 
-          success: true, 
-          afterImageUrl: aiResultUrl,
-          originalImageUrl: `/uploads/${req.file.filename}`,
-          processingMethod: 'ai'
-        });
-      } catch (aiError) {
-        console.log('AI processing failed, using local processing:', (aiError as Error).message);
-        
-        // Use specialized nose beautification for rhinoplasty
-        if (procedureType === 'rhinoplasty' || procedureType === 'nose_surgery') {
-          const noseResultPath = await noseBeautificationProcessor.beautifyNose(
-            req.file.path,
-            {
-              type: 'refinement',
-              intensity: parseInt(intensity) || 60,
-              preserveNaturalLook: true
-            }
-          );
-          
-          return res.json({ 
-            success: true, 
-            afterImageUrl: `/${noseResultPath}`,
-            originalImageUrl: `/uploads/${req.file.filename}`,
-            processingMethod: 'nose_beautification'
-          });
-        }
-        
-        // Fallback to local image processing for other procedures
-        const localResultPath = await imageProcessor.processSurgicalPreview(
+      // Use local processing directly for reliable results
+      console.log(`🔧 Processing ${procedureType} with local processors`);
+      
+      // Use specialized nose beautification for rhinoplasty
+      if (procedureType === 'rhinoplasty' || procedureType === 'nose_surgery') {
+        const noseResultPath = await noseBeautificationProcessor.beautifyNose(
           req.file.path,
-          procedureType || 'rhinoplasty',
-          faceAreas,
-          surgicalAdjustments,
-          parseInt(intensity)
+          {
+            type: 'refinement',
+            intensity: parseInt(intensity) || 60,
+            preserveNaturalLook: true
+          }
         );
         
         return res.json({ 
           success: true, 
-          afterImageUrl: `/${localResultPath}`,
+          afterImageUrl: `/${noseResultPath}`,
           originalImageUrl: `/uploads/${req.file.filename}`,
-          processingMethod: 'local'
+          processingMethod: 'nose_beautification'
         });
       }
+      
+      // Use local image processing for other procedures
+      const localResultPath = await imageProcessor.processSurgicalPreview(
+        req.file.path,
+        procedureType || 'rhinoplasty',
+        faceAreas,
+        surgicalAdjustments,
+        parseInt(intensity)
+      );
+        
+      return res.json({ 
+        success: true, 
+        afterImageUrl: `/${localResultPath}`,
+        originalImageUrl: `/uploads/${req.file.filename}`,
+        processingMethod: 'local'
+      });
 
     } catch (error) {
       console.error('Surgical preview error:', error);
@@ -216,20 +199,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse makeup area
       const makeupArea = typeof area === 'string' ? JSON.parse(area) : area;
       
-      // First try OpenAI for best results
+      // Use local makeup processing directly
+      console.log(`💄 Processing ${makeupType} makeup with local processors`);
+      
       try {
-        const aiRequest = {
-          imageUrl: req.file.path,
-          makeupType: makeupType || 'lipstick', 
-          color: color || '#FF6B6B',
-          intensity: parseInt(intensity),
-        };
-
-        const aiResultUrl = await aiProcessor.applyMakeup(aiRequest);
+        const makeupResultPath = await makeupProcessor.applyMakeup(
+          req.file.path,
+          {
+            type: makeupType || 'lipstick',
+            color: color || '#FF6B6B',
+            intensity: parseInt(intensity) || 50,
+            area: makeupArea
+          }
+        );
         
         return res.json({ 
           success: true, 
-          makeupImageUrl: aiResultUrl,
+          makeupImageUrl: `/${makeupResultPath}`,
           originalImageUrl: `/uploads/${req.file.filename}`,
           processingMethod: 'ai'
         });
@@ -504,7 +490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // استخدام نظام MediaPipe المحسن مع كشف دقيق للملامح
-      const landmarks = await opencvProcessor.detectPreciseLandmarks(req.file.path);
+      const landmarks = await opencvProcessor.detectFaceLandmarks(req.file.path);
       
       if (!landmarks.success) {
         throw new Error(landmarks.error || 'فشل في كشف ملامح الوجه');
@@ -571,36 +557,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       switch(region) {
         case 'lips':
-          processedImagePath = await makeupProcessor.applyLipstick(
-            req.file.path, 
-            color, 
-            parseInt(intensity), 
-            texture
-          );
-          break;
         case 'eyes':
-          processedImagePath = await makeupProcessor.applyEyeshadow(
-            req.file.path, 
-            color, 
-            parseInt(intensity)
-          );
-          break;
         case 'cheeks':
-          processedImagePath = await makeupProcessor.applyBlush(
-            req.file.path, 
-            color, 
-            parseInt(intensity)
-          );
-          break;
         case 'forehead':
-          processedImagePath = await makeupProcessor.applyHighlight(
-            req.file.path, 
-            color, 
-            parseInt(intensity)
+        default:
+          processedImagePath = await makeupProcessor.applyMakeup(
+            req.file.path,
+            {
+              type: region === 'lips' ? 'lipstick' : 
+                    region === 'eyes' ? 'eyeshadow' :
+                    region === 'cheeks' ? 'blush' : 'highlighter',
+              color: color,
+              intensity: parseInt(intensity),
+              area: { region }
+            }
           );
           break;
-        default:
-          throw new Error(`منطقة غير مدعومة: ${region}`);
       }
 
       res.json({
