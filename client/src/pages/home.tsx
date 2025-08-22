@@ -73,6 +73,55 @@ export default function Home() {
             </div>
 
             {/* Quick Action Buttons */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <a href="/faceapp" className="group">
+                <div className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
+                  <div className="text-2xl mb-2">🎭</div>
+                  <div className="font-bold">استوديو FaceApp</div>
+                  <div className="text-sm opacity-90">مكياج ومؤثرات احترافية</div>
+                </div>
+              </a>
+              
+              <a href="/3d-modeling" className="group">
+                <div className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
+                  <div className="text-2xl mb-2">🎯</div>
+                  <div className="font-bold">النمذجة ثلاثية الأبعاد</div>
+                  <div className="text-sm opacity-90">تحليل وجهك بدقة 3D</div>
+                </div>
+              </a>
+              
+              <a href="/doctor-portfolio" className="group">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
+                  <div className="text-2xl mb-2">👨‍⚕️</div>
+                  <div className="font-bold">ملفات الأطباء</div>
+                  <div className="text-sm opacity-90">عمليات حقيقية ونتائج مثبتة</div>
+                </div>
+              </a>
+              
+              <a href="/booking" className="group">
+                <div className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
+                  <div className="text-2xl mb-2">📅</div>
+                  <div className="font-bold">احجز موعدك</div>
+                  <div className="text-sm opacity-90">نظام حجز متطور كفيزيتا</div>
+                </div>
+              </a>
+            </div>
+
+            {/* New Features Badges */}
+            <div className="flex flex-wrap justify-center gap-3 mb-6">
+              <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 text-sm rounded-full flex items-center">
+                🆕 قاعدة بيانات ثلاثية الأبعاد
+              </div>
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 text-sm rounded-full flex items-center">
+                🔥 ملفات أطباء متكاملة
+              </div>
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 text-sm rounded-full flex items-center">
+                ⚡ نظام حجز مواعيد فوري
+              </div>
+              <div className="bg-gradient-to-r from-teal-500 to-green-500 text-white px-4 py-2 text-sm rounded-full flex items-center">
+                🏥 منصة عيادة متكاملة
+              </div>
+            </div>
             <div className="flex flex-wrap gap-4 mb-6 justify-center">
               <button
                 onClick={() => window.scrollTo({ top: 600, behavior: 'smooth' })}

@@ -14,6 +14,8 @@ import SubscriptionPage from "@/pages/subscription";
 import PaymentPage from "@/pages/payment";
 import ThreeDModelingPage from "@/pages/3d-modeling";
 import CommunicationPage from "@/pages/communication";
+import DoctorPortfolioPage from "@/pages/doctor-portfolio";
+import VezeetaBookingPage from "@/pages/vezeeta-booking";
 
 function Router() {
   return (
@@ -24,6 +26,8 @@ function Router() {
       <Route path="/faceapp" component={FaceAppPage} />
       <Route path="/3d-modeling" component={ThreeDModelingPage} />
       <Route path="/communication" component={CommunicationPage} />
+      <Route path="/doctor-portfolio" component={DoctorPortfolioPage} />
+      <Route path="/booking" component={VezeetaBookingPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/subscription" component={SubscriptionPage} />

@@ -20,6 +20,7 @@ import { seedDoctors } from "./seed-doctors";
 import { realtimeLipProcessor } from "./realtime-lip-processor";
 import { threeDFacialModeling } from "./three-d-facial-modeling";
 import { communicationPortal } from "./communication-portal";
+import { digitizedRhinoplastyManager } from "./digitized-rhinoplasty-manager";
 
 const faceEffectsProcessor = new FaceEffectsProcessor();
 const noseBeautificationProcessor = new NoseBeautificationProcessor();
@@ -1248,12 +1249,253 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Doctor Portfolio API Routes - ملفات الأطباء مع العمليات
+  
+  // Get doctor portfolios with filters
+  app.get('/api/doctor-portfolios', async (req, res) => {
+    try {
+      const { doctorId, procedureType } = req.query;
+      
+      console.log(`📁 جلب ملفات الأطباء - الطبيب: ${doctorId}, النوع: ${procedureType}`);
+      
+      const portfolios = await digitizedRhinoplastyManager.getDoctorPortfolios(
+        doctorId as string,
+        procedureType as string
+      );
+      
+      res.json({ success: true, portfolios });
+    } catch (error) {
+      console.error('Error fetching doctor portfolios:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في جلب ملفات الأطباء',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Add new portfolio entry
+  app.post('/api/doctor-portfolios', upload.fields([
+    { name: 'beforeImage', maxCount: 1 },
+    { name: 'afterImage', maxCount: 1 },
+    { name: 'video', maxCount: 1 }
+  ]), async (req, res) => {
+    try {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const {
+        doctorId,
+        title,
+        procedureType,
+        description,
+        patientAge,
+        patientGender,
+        surgeryDuration,
+        recoveryTime,
+        difficulty,
+        tags
+      } = req.body;
+
+      console.log(`📸 إضافة ملف عملية جديد: ${title}`);
+
+      if (!files.beforeImage || !files.afterImage) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'صور قبل وبعد العملية مطلوبة' 
+        });
+      }
+
+      const portfolioData = {
+        doctorId,
+        title,
+        procedureType,
+        description,
+        beforeImageUrl: `/uploads/${files.beforeImage[0].filename}`,
+        afterImageUrl: `/uploads/${files.afterImage[0].filename}`,
+        videoUrl: files.video ? `/uploads/${files.video[0].filename}` : undefined,
+        patientAge: parseInt(patientAge),
+        patientGender,
+        surgeryDuration: parseInt(surgeryDuration),
+        recoveryTime: parseInt(recoveryTime),
+        difficulty,
+        tags: tags ? JSON.parse(tags) : []
+      };
+
+      const portfolio = await digitizedRhinoplastyManager.addDoctorPortfolio(portfolioData);
+      
+      res.json({ success: true, portfolio });
+    } catch (error) {
+      console.error('Error adding portfolio:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في إضافة الملف',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Get full doctor profile
+  app.get('/api/doctors/:doctorId/profile', async (req, res) => {
+    try {
+      const { doctorId } = req.params;
+      
+      console.log(`👨‍⚕️ جلب ملف الطبيب الكامل: ${doctorId}`);
+      
+      const profile = await digitizedRhinoplastyManager.getDoctorFullProfile(doctorId);
+      
+      if (!profile) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'الطبيب غير موجود' 
+        });
+      }
+      
+      res.json({ success: true, profile });
+    } catch (error) {
+      console.error('Error fetching doctor profile:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في جلب ملف الطبيب',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Add doctor review
+  app.post('/api/doctors/:doctorId/reviews', upload.array('beforeAfterPhotos', 5), async (req, res) => {
+    try {
+      const { doctorId } = req.params;
+      const files = req.files as Express.Multer.File[];
+      const {
+        patientId,
+        consultationId,
+        rating,
+        reviewText,
+        procedureType,
+        communicationRating,
+        facilityRating,
+        valueForMoney
+      } = req.body;
+
+      console.log(`⭐ إضافة تقييم للطبيب ${doctorId}: ${rating} نجوم`);
+
+      const beforeAfterPhotos = files ? files.map(file => `/uploads/${file.filename}`) : [];
+
+      const reviewData = {
+        doctorId,
+        patientId,
+        consultationId,
+        rating: parseInt(rating),
+        reviewText,
+        procedureType,
+        beforeAfterPhotos,
+        communicationRating: parseInt(communicationRating),
+        facilityRating: parseInt(facilityRating),
+        valueForMoney: parseInt(valueForMoney)
+      };
+
+      const review = await digitizedRhinoplastyManager.addDoctorReview(reviewData);
+      
+      res.json({ success: true, review });
+    } catch (error) {
+      console.error('Error adding review:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في إضافة التقييم',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // 3D Face Mesh Database API
+  app.get('/api/face-mesh-database', async (req, res) => {
+    try {
+      const { faceType, noseType, gender, ethnicity, ageRange, minQuality } = req.query;
+      
+      console.log(`🎭 البحث في قاعدة بيانات الوجوه ثلاثية الأبعاد`);
+      
+      const filters = {
+        faceType: faceType as string,
+        noseType: noseType as string,
+        gender: gender as string,
+        ethnicity: ethnicity as string,
+        ageRange: ageRange as string,
+        minQuality: minQuality ? parseFloat(minQuality as string) : undefined
+      };
+
+      const meshes = await digitizedRhinoplastyManager.searchFaceMeshDatabase(filters);
+      
+      res.json({ success: true, meshes });
+    } catch (error) {
+      console.error('Error searching face mesh database:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في البحث في قاعدة البيانات',
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // Create surgery simulation
+  app.post('/api/surgery-simulation', upload.single('originalImage'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'الصورة الأصلية مطلوبة' 
+        });
+      }
+
+      const {
+        consultationId,
+        doctorId,
+        patientId,
+        procedureType,
+        targetNoseType,
+        targetFaceShape,
+        simulationParameters,
+        surgeonNotes
+      } = req.body;
+
+      console.log(`🔬 إنشاء محاكاة جراحية: ${procedureType}`);
+
+      const simulationData = {
+        consultationId,
+        doctorId,
+        patientId,
+        procedureType,
+        originalImageUrl: `/uploads/${req.file.filename}`,
+        targetNoseType,
+        targetFaceShape,
+        simulationParameters: simulationParameters ? JSON.parse(simulationParameters) : {},
+        surgeonNotes
+      };
+
+      const simulation = await digitizedRhinoplastyManager.createSurgerySimulation(simulationData);
+      
+      res.json({ success: true, simulation });
+    } catch (error) {
+      console.error('Error creating surgery simulation:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في إنشاء المحاكاة الجراحية',
+        details: (error as Error).message 
+      });
+    }
+  });
+
   // Register consultation booking routes
   registerConsultationRoutes(app);
 
   // Seed doctors data if needed (run only once)
-  setTimeout(() => {
-    seedDoctors().catch(console.error);
+  setTimeout(async () => {
+    try {
+      await seedDoctors();
+      // Initialize comprehensive demo data
+      const { seedDemoData } = await import('./seed-demo-data');
+      await seedDemoData();
+    } catch (error) {
+      console.error('Error seeding data:', error);
+    }
   }, 1000);
 
   const httpServer = createServer(app);
