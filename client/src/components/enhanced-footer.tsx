@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'wouter';
 import { 
   Heart, 
   Star, 
@@ -125,10 +126,12 @@ export default function EnhancedFooter() {
             </div>
             
             <div className="mt-6">
-              <Button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700">
-                <Mail className="w-4 h-4 ml-2" />
-                ابدأ استشارة مجانية
-              </Button>
+              <Link href="/booking">
+                <Button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700">
+                  <Mail className="w-4 h-4 ml-2" />
+                  ابدأ استشارة مجانية
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
