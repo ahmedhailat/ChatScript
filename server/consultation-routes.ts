@@ -1,9 +1,48 @@
 import type { Express } from "express";
 import { db } from "./db";
-import { doctors, timeSlots, bookingConsultations } from "@shared/schema";
+import { doctors, timeSlots, bookingConsultations, doctorProfiles } from "@shared/schema";
 import { eq, and, gte, desc } from "drizzle-orm";
 
 export function registerConsultationRoutes(app: Express) {
+  // Register new doctor - simplified version
+  app.post('/api/register-doctor', async (req, res) => {
+    try {
+      const { name, email, phone, specialty, experience, bio, hourlyRate } = req.body;
+
+      // Basic validation
+      if (!name || !email || !phone || !specialty) {
+        return res.status(400).json({ error: 'جميع الحقول المطلوبة يجب ملؤها' });
+      }
+
+      // Create new doctor (simplified approach - skip complex profile for now)
+      const [newDoctor] = await db.insert(doctors).values({
+        name: name,
+        specialty: specialty,
+        experience: parseInt(experience) || 0,
+        rating: 4.5, // Default good rating
+        bio: bio || `طبيب متخصص في ${specialty}`,
+        hourlyRate: parseInt(hourlyRate) * 100 || 40000, // Convert to cents (default 400 SAR)
+        isActive: true, // Auto-approve for demo
+      }).returning();
+
+      res.json({
+        success: true,
+        id: newDoctor.id,
+        message: 'تم تسجيل الطبيب بنجاح! 🎉',
+        doctor: {
+          id: newDoctor.id,
+          name: newDoctor.name,
+          specialty: newDoctor.specialty,
+          status: 'approved'
+        }
+      });
+
+    } catch (error) {
+      console.error('Error registering doctor:', error);
+      res.status(500).json({ error: 'فشل في تسجيل الطبيب. يرجى المحاولة مرة أخرى' });
+    }
+  });
+
   // Get available doctors by specialty
   app.get('/api/doctors', async (req, res) => {
     try {

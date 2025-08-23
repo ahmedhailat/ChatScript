@@ -125,11 +125,18 @@ export default function EnhancedFooter() {
               </div>
             </div>
             
-            <div className="mt-6">
+            <div className="mt-6 space-y-3">
               <Link href="/booking">
                 <Button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700">
                   <Mail className="w-4 h-4 ml-2" />
                   ابدأ استشارة مجانية
+                </Button>
+              </Link>
+              
+              <Link href="/doctor-registration">
+                <Button variant="outline" className="w-full border-purple-500 text-purple-300 hover:bg-purple-600 hover:text-white">
+                  <Shield className="w-4 h-4 ml-2" />
+                  انضم كطبيب
                 </Button>
               </Link>
             </div>
