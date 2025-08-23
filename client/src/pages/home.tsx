@@ -73,7 +73,23 @@ export default function Home() {
             </div>
 
             {/* Quick Action Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+              <a href="/register" className="group">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
+                  <div className="text-2xl mb-2">✨</div>
+                  <div className="font-bold">إنشاء حساب</div>
+                  <div className="text-sm opacity-90">ابدأ رحلتك معنا مجاناً</div>
+                </div>
+              </a>
+
+              <a href="/login" className="group">
+                <div className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
+                  <div className="text-2xl mb-2">🔐</div>
+                  <div className="font-bold">تسجيل الدخول</div>
+                  <div className="text-sm opacity-90">الوصول لحسابك الحالي</div>
+                </div>
+              </a>
+              
               <a href="/faceapp" className="group">
                 <div className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
                   <div className="text-2xl mb-2">🎭</div>
@@ -82,19 +98,11 @@ export default function Home() {
                 </div>
               </a>
               
-              <a href="/3d-modeling" className="group">
-                <div className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
-                  <div className="text-2xl mb-2">🎯</div>
-                  <div className="font-bold">النمذجة ثلاثية الأبعاد</div>
-                  <div className="text-sm opacity-90">تحليل وجهك بدقة 3D</div>
-                </div>
-              </a>
-              
-              <a href="/doctor-portfolio" className="group">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
-                  <div className="text-2xl mb-2">👨‍⚕️</div>
-                  <div className="font-bold">ملفات الأطباء</div>
-                  <div className="text-sm opacity-90">عمليات حقيقية ونتائج مثبتة</div>
+              <a href="/subscription" className="group">
+                <div className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 p-4 rounded-xl transition-all duration-300 transform group-hover:scale-105">
+                  <div className="text-2xl mb-2">💳</div>
+                  <div className="font-bold">الباقات والدفع</div>
+                  <div className="text-sm opacity-90">اختر باقتك المناسبة</div>
                 </div>
               </a>
               

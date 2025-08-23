@@ -57,32 +57,42 @@ export default function EnhancedHeader() {
               <Wand2 className="w-4 h-4" />
               <span>استوديو FaceApp</span>
             </a>
-            <a href="/tutorial" className="flex items-center space-x-2 gap-2 hover:text-pink-300 transition-colors">
-              <Video className="w-4 h-4" />
-              <span>الدروس التعليمية</span>
+            <a href="/booking" className="flex items-center space-x-2 gap-2 hover:text-pink-300 transition-colors">
+              <Heart className="w-4 h-4" />
+              <span>حجز موعد</span>
+            </a>
+            <a href="/doctor-registration" className="flex items-center space-x-2 gap-2 hover:text-pink-300 transition-colors">
+              <User className="w-4 h-4" />
+              <span>انضم كطبيب</span>
             </a>
           </nav>
 
           {/* Action buttons */}
           <div className="flex items-center space-x-4 gap-4">
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
-              <Settings className="w-4 h-4 ml-2" />
-              الإعدادات
-            </Button>
+            <a href="/login">
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+                <User className="w-4 h-4 ml-2" />
+                تسجيل الدخول
+              </Button>
+            </a>
             
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
-              <User className="w-4 h-4 ml-2" />
-              الملف الشخصي
-            </Button>
+            <a href="/register">
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+                <Settings className="w-4 h-4 ml-2" />
+                إنشاء حساب
+              </Button>
+            </a>
             
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              <LogOut className="w-4 h-4 ml-2" />
-              تسجيل الخروج
-            </Button>
+            <a href="/subscription">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-gradient-to-r from-pink-500 to-purple-500 border-white/20 text-white hover:bg-white/20"
+              >
+                <Crown className="w-4 h-4 ml-2" />
+                الاشتراكات والدفع
+              </Button>
+            </a>
           </div>
         </div>
 
