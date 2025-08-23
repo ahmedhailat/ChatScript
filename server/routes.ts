@@ -137,43 +137,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const faceAreas = typeof areas === 'string' ? JSON.parse(areas) : areas;
       const surgicalAdjustments = typeof adjustments === 'string' ? JSON.parse(adjustments) : adjustments;
       
-      // Use local processing directly for reliable results
-      console.log(`🔧 Processing ${procedureType} with local processors`);
-      
-      // Use specialized nose beautification for rhinoplasty
-      if (procedureType === 'rhinoplasty' || procedureType === 'nose_surgery') {
-        const noseResultPath = await noseBeautificationProcessor.beautifyNose(
-          req.file.path,
-          {
-            type: 'refinement',
-            intensity: parseInt(intensity) || 60,
-            preserveNaturalLook: true
-          }
-        );
+      // Try AI processing first, fallback to local if needed
+      try {
+        console.log(`🤖 Processing ${procedureType} with OpenAI AI`);
+        
+        const aiRequest = {
+          imageUrl: req.file.path,
+          procedureType: procedureType || 'rhinoplasty',
+          intensity: parseInt(intensity) || 50,
+          areas: faceAreas,
+          adjustments: surgicalAdjustments
+        };
+
+        const aiResultUrl = await aiProcessor.generateSurgicalVisualization(aiRequest);
         
         return res.json({ 
           success: true, 
-          afterImageUrl: `/${noseResultPath}`,
+          afterImageUrl: aiResultUrl,
           originalImageUrl: `/uploads/${req.file.filename}`,
-          processingMethod: 'nose_beautification'
+          processingMethod: 'openai_ai'
+        });
+        
+      } catch (aiError: any) {
+        console.log('🔧 AI processing failed, switching to local processors:', aiError.message);
+        
+        // Use specialized nose beautification for rhinoplasty
+        if (procedureType === 'rhinoplasty' || procedureType === 'nose_surgery') {
+          const noseResultPath = await noseBeautificationProcessor.beautifyNose(
+            req.file.path,
+            {
+              type: 'refinement',
+              intensity: parseInt(intensity) || 60,
+              preserveNaturalLook: true
+            }
+          );
+          
+          return res.json({ 
+            success: true, 
+            afterImageUrl: `/${noseResultPath}`,
+            originalImageUrl: `/uploads/${req.file.filename}`,
+            processingMethod: 'nose_beautification_fallback'
+          });
+        }
+        
+        // Use local image processing for other procedures
+        const localResultPath = await imageProcessor.processSurgicalPreview(
+          req.file.path,
+          procedureType || 'rhinoplasty',
+          faceAreas,
+          surgicalAdjustments,
+          parseInt(intensity)
+        );
+          
+        return res.json({ 
+          success: true, 
+          afterImageUrl: `/${localResultPath}`,
+          originalImageUrl: `/uploads/${req.file.filename}`,
+          processingMethod: 'local_fallback'
         });
       }
-      
-      // Use local image processing for other procedures
-      const localResultPath = await imageProcessor.processSurgicalPreview(
-        req.file.path,
-        procedureType || 'rhinoplasty',
-        faceAreas,
-        surgicalAdjustments,
-        parseInt(intensity)
-      );
-        
-      return res.json({ 
-        success: true, 
-        afterImageUrl: `/${localResultPath}`,
-        originalImageUrl: `/uploads/${req.file.filename}`,
-        processingMethod: 'local'
-      });
 
     } catch (error) {
       console.error('Surgical preview error:', error);
@@ -200,28 +222,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse makeup area
       const makeupArea = typeof area === 'string' ? JSON.parse(area) : area;
       
-      // Use local makeup processing directly
-      console.log(`💄 Processing ${makeupType} makeup with local processors`);
-      
+      // Try AI makeup processing first, fallback to local if needed
       try {
-        const makeupResultPath = await makeupProcessor.applyMakeup(
-          req.file.path,
-          {
-            type: makeupType || 'lipstick',
-            color: color || '#FF6B6B',
-            intensity: parseInt(intensity) || 50,
-            area: makeupArea
-          }
-        );
+        console.log(`🤖 Processing ${makeupType} makeup with OpenAI AI`);
+        
+        const aiResultPath = await aiProcessor.applyMakeup({
+          imageUrl: req.file.path,
+          makeupType: makeupType || 'lipstick',
+          color: color || '#FF6B6B',
+          intensity: parseInt(intensity) || 50
+        });
         
         return res.json({ 
           success: true, 
-          makeupImageUrl: `/${makeupResultPath}`,
+          makeupImageUrl: aiResultPath,
           originalImageUrl: `/uploads/${req.file.filename}`,
-          processingMethod: 'ai'
+          processingMethod: 'openai_ai'
         });
+        
       } catch (aiError) {
-        console.log('AI makeup failed, using local processing:', (aiError as Error).message);
+        console.log('🔧 AI makeup failed, switching to local processing:', (aiError as Error).message);
         
         // Fallback to local makeup processing
         const localResultPath = await makeupProcessor.applyMakeup(
