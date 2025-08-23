@@ -68,11 +68,13 @@ export default function RegisterPage() {
       
       toast({
         title: "تم إنشاء الحساب بنجاح",
-        description: "مرحباً بك في MedVision AI. يرجى تفعيل حسابك عبر البريد الإلكتروني",
+        description: "مرحباً بك في MedVision AI. يمكنك الآن تسجيل الدخول",
       });
       
-      // Redirect to verification page
-      window.location.href = "/verify-email";
+      // Redirect to login page
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1500);
     } catch (error) {
       toast({
         title: "خطأ في إنشاء الحساب",
