@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Eye, EyeOff, Mail, Lock, User, Phone, Brain, ArrowRight, Check } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Phone, Brain, ArrowRight, Check, Stethoscope, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
+    userType: "", // doctor or patient
     firstName: "",
     lastName: "",
     email: "",
@@ -51,6 +53,15 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!formData.userType) {
+      toast({
+        title: "يرجى اختيار نوع الحساب",
+        description: "يجب اختيار إما طبيب أو مريض للمتابعة",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!formData.agreeToTerms) {
       toast({
         title: "يرجى الموافقة على الشروط",
@@ -66,9 +77,10 @@ export default function RegisterPage() {
       // Simulate registration API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      const userTypeText = formData.userType === "doctor" ? "كطبيب" : "كمريض";
       toast({
-        title: "تم إنشاء الحساب بنجاح",
-        description: "مرحباً بك في MedVision AI. يمكنك الآن تسجيل الدخول",
+        title: `تم إنشاء حساب ${userTypeText} بنجاح`,
+        description: `مرحباً بك في MedVision AI ${userTypeText}. يمكنك الآن تسجيل الدخول`,
       });
       
       // Redirect to login page
@@ -108,6 +120,74 @@ export default function RegisterPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
+              {/* User Type Selection */}
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold">نوع الحساب</Label>
+                <RadioGroup 
+                  value={formData.userType} 
+                  onValueChange={(value) => handleInputChange("userType", value)}
+                  className="grid grid-cols-1 gap-4"
+                >
+                  {/* Doctor Option */}
+                  <div className="flex items-center space-x-3 space-x-reverse">
+                    <RadioGroupItem value="doctor" id="doctor" />
+                    <Label htmlFor="doctor" className="flex-1 cursor-pointer">
+                      <Card className={`p-4 transition-all duration-200 hover:shadow-md ${
+                        formData.userType === 'doctor' 
+                          ? 'bg-medical-blue/10 border-medical-blue' 
+                          : 'hover:bg-slate-50'
+                      }`}>
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-medical-blue rounded-lg">
+                            <Stethoscope className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-slate-900">حساب طبيب</h3>
+                            <p className="text-sm text-slate-600">
+                              للأطباء والمختصين في مجال التجميل والطب
+                            </p>
+                            <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
+                              <li>إدارة المرضى والحجوزات</li>
+                              <li>أدوات التصور الطبي المتقدمة</li>
+                              <li>ملف احترافي للعيادة</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </Card>
+                    </Label>
+                  </div>
+
+                  {/* Patient Option */}
+                  <div className="flex items-center space-x-3 space-x-reverse">
+                    <RadioGroupItem value="patient" id="patient" />
+                    <Label htmlFor="patient" className="flex-1 cursor-pointer">
+                      <Card className={`p-4 transition-all duration-200 hover:shadow-md ${
+                        formData.userType === 'patient' 
+                          ? 'bg-ai-purple/10 border-ai-purple' 
+                          : 'hover:bg-slate-50'
+                      }`}>
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-ai-purple rounded-lg">
+                            <Heart className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-slate-900">حساب مريض</h3>
+                            <p className="text-sm text-slate-600">
+                              للمرضى والأشخاص المهتمين بخدمات التجميل
+                            </p>
+                            <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
+                              <li>استكشاف النتائج المحتملة</li>
+                              <li>حجز المواعيد مع الأطباء</li>
+                              <li>متابعة الحالة الصحية</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </Card>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
               {/* Name Fields */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -175,22 +255,28 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Specialty Field */}
-              <div className="space-y-2">
-                <Label htmlFor="specialty">التخصص الطبي</Label>
-                <Select onValueChange={(value) => handleInputChange("specialty", value)} required>
-                  <SelectTrigger className="text-right" data-testid="select-specialty">
-                    <SelectValue placeholder="اختر تخصصك الطبي" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {specialties.map((specialty) => (
-                      <SelectItem key={specialty.value} value={specialty.value}>
-                        {specialty.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Specialty Field - Only for doctors */}
+              {formData.userType === "doctor" && (
+                <div className="space-y-2">
+                  <Label htmlFor="specialty">التخصص الطبي *</Label>
+                  <Select 
+                    value={formData.specialty} 
+                    onValueChange={(value) => handleInputChange("specialty", value)} 
+                    required
+                  >
+                    <SelectTrigger className="text-right" data-testid="select-specialty">
+                      <SelectValue placeholder="اختر تخصصك الطبي" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specialties.map((specialty) => (
+                        <SelectItem key={specialty.value} value={specialty.value}>
+                          {specialty.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Password Fields */}
               <div className="space-y-2">
