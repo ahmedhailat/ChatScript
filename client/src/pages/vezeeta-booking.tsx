@@ -125,7 +125,7 @@ export default function VezeetaBookingPage() {
   // حجز موعد
   const bookAppointmentMutation = useMutation({
     mutationFn: async (bookingData: any) => {
-      const response = await apiRequest('POST', '/api/bookings', bookingData);
+      const response = await apiRequest('POST', '/api/appointments', bookingData);
       return response.json();
     },
     onSuccess: () => {
@@ -186,18 +186,21 @@ export default function VezeetaBookingPage() {
   };
 
   const handleBookAppointment = (formData: any) => {
+    // Generate a time slot ID if needed
+    const timeSlotId = selectedTimeSlot?.id || `slot-${selectedDate?.getTime()}-${selectedTimeSlot}`;
+    
     const bookingData = {
       doctorId: selectedDoctor?.id,
-      appointmentDate: selectedDate,
-      timeSlot: selectedTimeSlot,
+      timeSlotId: timeSlotId,
+      appointmentDate: selectedDate?.toISOString(),
       consultationType,
+      notes: formData.notes || '',
       patientName: formData.patientName,
       patientPhone: formData.patientPhone,
-      patientEmail: formData.patientEmail,
-      notes: formData.notes,
-      price: selectedDoctor?.consultationFee || 0
+      duration: 30
     };
 
+    console.log('إرسال بيانات الحجز:', bookingData);
     bookAppointmentMutation.mutate(bookingData);
   };
 

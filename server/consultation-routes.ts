@@ -64,7 +64,7 @@ export function registerConsultationRoutes(app: Express) {
   });
 
   // Create a new consultation booking
-  app.post('/api/consultations', async (req, res) => {
+  app.post('/api/appointments', async (req, res) => {
     try {
       const {
         doctorId,
