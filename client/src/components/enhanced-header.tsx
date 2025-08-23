@@ -65,6 +65,14 @@ export default function EnhancedHeader() {
               <User className="w-4 h-4" />
               <span>انضم كطبيب</span>
             </a>
+            <a href="/doctor-portal" className="flex items-center space-x-2 gap-2 hover:text-pink-300 transition-colors">
+              <Wand2 className="w-4 h-4" />
+              <span>منطقة الأطباء</span>
+            </a>
+            <a href="/patient-portal" className="flex items-center space-x-2 gap-2 hover:text-pink-300 transition-colors">
+              <Heart className="w-4 h-4" />
+              <span>منطقة المرضى</span>
+            </a>
           </nav>
 
           {/* Action buttons */}

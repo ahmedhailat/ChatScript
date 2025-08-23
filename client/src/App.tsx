@@ -17,6 +17,8 @@ import CommunicationPage from "@/pages/communication";
 import DoctorPortfolioPage from "@/pages/doctor-portfolio";
 import VezeetaBookingPage from "@/pages/vezeeta-booking";
 import DoctorRegistrationPage from "@/pages/doctor-registration";
+import DoctorPortal from "@/pages/doctor-portal";
+import PatientPortal from "@/pages/patient-portal";
 
 function Router() {
   return (
@@ -30,6 +32,8 @@ function Router() {
       <Route path="/doctor-portfolio" component={DoctorPortfolioPage} />
       <Route path="/booking" component={VezeetaBookingPage} />
       <Route path="/doctor-registration" component={DoctorRegistrationPage} />
+      <Route path="/doctor-portal" component={DoctorPortal} />
+      <Route path="/patient-portal" component={PatientPortal} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/subscription" component={SubscriptionPage} />

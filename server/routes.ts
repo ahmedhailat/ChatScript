@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { advancedFaceProcessor } from "./advanced-face-processor";
 import { insertPatientSchema, insertConsultationSchema } from "@shared/schema";
@@ -1510,6 +1511,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register consultation booking routes
   registerConsultationRoutes(app);
 
+  // Consultation endpoints for portals
+  app.get('/api/booking-consultations/doctor', async (req, res) => {
+    try {
+      // For demo, return all consultations (in real app, filter by doctor ID from auth)
+      const consultations = await storage.getAllConsultations();
+      const patients = await storage.getAllPatients();
+      
+      const consultationsWithPatients = consultations.map(consultation => {
+        const patient = patients.find(p => p.phone === consultation.patientPhone);
+        return {
+          ...consultation,
+          patientName: patient?.name || consultation.patientName || 'مريض غير معروف'
+        };
+      });
+      
+      res.json(consultationsWithPatients);
+    } catch (error) {
+      console.error('Error fetching doctor consultations:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في جلب الاستشارات' 
+      });
+    }
+  });
+
+  app.get('/api/booking-consultations/patient', async (req, res) => {
+    try {
+      // For demo, return all consultations (in real app, filter by patient ID from auth)
+      const consultations = await storage.getAllConsultations();
+      res.json(consultations);
+    } catch (error) {
+      console.error('Error fetching patient consultations:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في جلب الاستشارات' 
+      });
+    }
+  });
+
+  // Communication Portal API Routes
+  app.get('/api/messages/:consultationId', async (req, res) => {
+    try {
+      const { consultationId } = req.params;
+      const messages = await communicationPortal.getMessages(consultationId);
+      res.json({ success: true, messages });
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في جلب الرسائل' 
+      });
+    }
+  });
+
+  app.post('/api/messages', async (req, res) => {
+    try {
+      const messageData = req.body;
+      const message = await communicationPortal.sendMessage(messageData);
+      
+      // Broadcast to WebSocket clients
+      broadcastToConsultation(messageData.consultationId, {
+        type: 'new_message',
+        message
+      });
+      
+      res.json({ success: true, message });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في إرسال الرسالة' 
+      });
+    }
+  });
+
+  app.post('/api/video-calls', async (req, res) => {
+    try {
+      const videoCallData = req.body;
+      const videoCall = await communicationPortal.scheduleVideoCall(videoCallData);
+      
+      // Broadcast to WebSocket clients
+      broadcastToConsultation(videoCallData.consultationId, {
+        type: 'video_call_scheduled',
+        videoCall
+      });
+      
+      res.json({ success: true, videoCall });
+    } catch (error) {
+      console.error('Error scheduling video call:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في جدولة المكالمة المرئية' 
+      });
+    }
+  });
+
+  app.post('/api/file-shares', upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'لم يتم رفع أي ملف' 
+        });
+      }
+
+      const fileShareData = {
+        consultationId: req.body.consultationId,
+        uploadedBy: req.body.uploadedBy,
+        fileName: req.file.originalname,
+        fileType: req.body.fileType || 'document',
+        fileUrl: `/uploads/${req.file.filename}`,
+        fileSize: req.file.size,
+        description: req.body.description
+      };
+
+      const fileShare = await communicationPortal.uploadFile(fileShareData);
+      
+      // Broadcast to WebSocket clients
+      broadcastToConsultation(req.body.consultationId, {
+        type: 'file_shared',
+        fileShare
+      });
+      
+      res.json({ success: true, fileShare });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'فشل في رفع الملف' 
+      });
+    }
+  });
+
   // Seed doctors data if needed (run only once)
   setTimeout(async () => {
     try {
@@ -1523,5 +1657,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }, 1000);
 
   const httpServer = createServer(app);
+
+  // WebSocket Server for Real-time Communication
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // Store active connections by consultation ID
+  const consultationConnections = new Map<string, Set<WebSocket>>();
+  
+  wss.on('connection', (ws: WebSocket, req) => {
+    console.log('💬 اتصال WebSocket جديد');
+    
+    ws.on('message', (data) => {
+      try {
+        const message = JSON.parse(data.toString());
+        
+        if (message.type === 'join_consultation') {
+          const consultationId = message.consultationId;
+          
+          if (!consultationConnections.has(consultationId)) {
+            consultationConnections.set(consultationId, new Set());
+          }
+          
+          consultationConnections.get(consultationId)!.add(ws);
+          
+          console.log(`👥 انضمام إلى الاستشارة: ${consultationId}`);
+          
+          // Send confirmation
+          ws.send(JSON.stringify({
+            type: 'joined_consultation',
+            consultationId
+          }));
+        }
+        
+        if (message.type === 'typing') {
+          // Broadcast typing indicator to other users in the consultation
+          broadcastToConsultation(message.consultationId, {
+            type: 'user_typing',
+            userId: message.userId,
+            senderType: message.senderType
+          }, ws);
+        }
+        
+        if (message.type === 'stop_typing') {
+          // Broadcast stop typing indicator
+          broadcastToConsultation(message.consultationId, {
+            type: 'user_stop_typing',
+            userId: message.userId
+          }, ws);
+        }
+        
+      } catch (error) {
+        console.error('خطأ في معالجة رسالة WebSocket:', error);
+      }
+    });
+    
+    ws.on('close', () => {
+      console.log('🔌 إغلاق اتصال WebSocket');
+      // Remove connection from all consultations
+      consultationConnections.forEach((connections, consultationId) => {
+        connections.delete(ws);
+        if (connections.size === 0) {
+          consultationConnections.delete(consultationId);
+        }
+      });
+    });
+    
+    ws.on('error', (error) => {
+      console.error('خطأ في WebSocket:', error);
+    });
+  });
+  
+  // Function to broadcast messages to all clients in a consultation
+  function broadcastToConsultation(consultationId: string, message: any, exclude?: WebSocket) {
+    const connections = consultationConnections.get(consultationId);
+    if (connections) {
+      connections.forEach((client) => {
+        if (client !== exclude && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(message));
+        }
+      });
+    }
+  }
+
+  console.log('💬 نظام التواصل الفوري جاهز - WebSocket Server بدأ');
+  
   return httpServer;
 }
